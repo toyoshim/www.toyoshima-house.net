@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888">
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■Rubyを使った楽々Dial-up Router制御法 ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">Rubyを使った楽々Dial-up Router制御法</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			大抵のダイヤルアップルーターはウェブページを利用して制御できるようになっていますが、いちいちページを開くのは面倒です（というか、うちのSOHO-128 SL11なんで例のごとくNet+と相性が悪い）。まじめに制御プログラムを書くのも悪くはないのですが、スクリプト言語を使ってちょちょいと処理してしまうのも手です。そんなわけでPerlを・・・と言いたいところなのですが、Be版のPerlは未だにsocketが使えません。が我々には日本発のオブジェクト指向スクリプト言語Rubyがあるではないですか。ということで、Rubyを使った簡単なプログラムでダイヤルアップルーターを制御してみましょう。
+			<br>&nbsp;<br><font size="+1">◆制御方法を調べる</font>
+			<p>&nbsp;
+			本当はこれを調べるのが大変なのかもしれませんが・・・。とにかく接続、切断に必要なリクエストを調査します。間にプロキシサーバーなどを挟んで、ログを取るとわかります。ちなみにSOHO-128SL11の場合は次のようになっています。
+			<p>&nbsp;[接続]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">	POST /config-quick.cgi HTTP/1.0
+	Content-Length: 10
+
+	connect+0=</font></pre></td></tr></table></div>
+			<p>&nbsp;[切断]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">	POST /config-quick.cgi HTTP/1.0
+	Content-Length: 15
+
+	disconnect+all=</font></pre></td></tr></table></div>
+			<br>&nbsp;<br><font size="+1">◆Rubyスクリプトを書く</font>
+			<p>&nbsp;
+			いきなりですが、スクリプトを書きます。調べた接続、切断のための送信データをファイルとして保存します。ここでは/home/config/etc/connect、/home/config/etc/disconnectとして保存したと仮定します。
+			<p>&nbsp;[スクリプト]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">	#!/boot/home/config/bin/ruby
+
+	require "socket"
+
+	server="169.254.1.1";
+	port="80";
+	confpath = "/boot/config/etc/";
+	mode = ARGV.shift;
+	if (mode == "disconnect")
+		fname = confpath + "connect";
+	else
+		fname = confpath + "disconnect";
+	end
+
+	file = open(fname, "r");
+	sock = TCPsocket.open(server, port);
+
+	while line = file.gets
+		sock.write line;
+	end
+
+	sock.close;
+	file.close;</font></pre></td></tr></table></div>
+			<p>&nbsp;
+			これだけ。簡単（笑）。これを/boot/home/config/bin/duprtr.rbなどとして、Terminalから
+			<br>$ duprtr.rb connect とか、
+			<br>$ duprtr.rb disconnect とかすれば接続・切断ができます。あ、当然スクリプト中のserverは
+			ルーターに割り当てられているアドレスにしてください。普通の人だと192.168.0.1とかが多いでしょうか。
+			私の場合、ルーターのアドレスを定義ファイルの最初の行にいれて、スクリプトで処理をして接続先を決めていますが
+			まぁ、普通はそんなことする必要もないでしょう。いちいちTerminalから打つのが面倒なら、<br>&nbsp;<br>
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">	#!/bin/sh
+
+	duprtr.rb connect</font></pre></td></tr></table></div>
+			<p>&nbsp;
+			ってな感じのファイルをデスクトップ上に「インターネットに接続」なんて名前で作っといてやれば、
+			これをダブルクリックするだけでOK。ね、簡単。スクリプト言語バンザイ。
+		</blockquote>
+		<div align="center"><a href="./index.html">すげーぜ！</a></div>
+		<hr width="80%">
+		<div align="center"><a href="../main.html"><img src="../banner/psbanner.jpg" width="200" height="40" border="0"></a></div>
+		&nbsp;<br>
+		<div align="right">CVS 最終更新 ---- $Id: tips_duprtr.html,v 1.2 2000/07/02 15:12:00 toyoshim Exp $</div>
+	</body>
+</html>

@@ -1,0 +1,158 @@
+diff -cNr include.orig/string.h include/string.h
+*** include.orig/string.h	Thu Jan  1 09:00:00 1970
+--- include/string.h	Sat Apr  6 14:49:27 2002
+***************
+*** 0 ****
+--- 1,83 ----
++ #ifndef _STRING_H
++ #define _STRING_H
++ 
++ #ifdef __cplusplus
++ extern "C" {
++ #endif
++ 
++ #ifndef _WCHAR_T_DEFINED
++ #define _WCHAR_T_DEFINED
++ #ifndef _WCHAR_T_
++ #define _WCHAR_T_
++ #undef __need_wchar_t
++ #ifndef __cplusplus
++ typedef unsigned short wchar_t;
++ #endif
++ #endif
++ #endif
++ 
++ #ifndef _SIZE_T_DEFINED
++ #define _SIZE_T_DEFINED
++ #ifndef _SIZE_T_
++ #define _SIZE_T_
++ #undef __need_size_t
++ #ifndef __cplusplus
++ typedef unsigned long size_t;
++ #endif
++ #endif
++ #endif
++ 
++ wchar_t *wcscat(wchar_t *, const wchar_t *);
++ wchar_t *wcschr(const wchar_t *, wchar_t);
++ int      wcscmp(const wchar_t *, const wchar_t *);
++ wchar_t *wcscpy(wchar_t *, const wchar_t *);
++ size_t   wcscspn(const wchar_t *, const wchar_t *);
++ size_t   wcslen(const wchar_t *);
++ 
++ size_t   mbstowcs(wchar_t *, const char *, size_t);
++ size_t   wcstombs(char *, const wchar_t *, size_t);
++ 
++ wchar_t *wcsncat(wchar_t *, const wchar_t *, size_t);
++ int      wcsncmp(const wchar_t *, const wchar_t *, size_t);
++ wchar_t *wcsncpy(wchar_t *, const wchar_t *, size_t);
++ wchar_t *wcspbrk(const wchar_t *, const wchar_t *);
++ wchar_t *wcsrchr(const wchar_t *, wchar_t);
++ size_t   wcsspn(const wchar_t *, const wchar_t *);
++ wchar_t *wcsstr(const wchar_t *, const wchar_t *);
++ wchar_t *wcstok(wchar_t *, const wchar_t *);
++ wchar_t *_wcsdup(const wchar_t *);
++ int      _wcsicmp(const wchar_t *, const wchar_t *);
++ int      _wcsnicmp(const wchar_t *, const wchar_t *, size_t);
++ wchar_t *_wcsnset(wchar_t *, wchar_t, size_t);
++ wchar_t *_wcsrev(wchar_t *);
++ wchar_t *_wcsset(wchar_t *, wchar_t);
++ wchar_t *_wcslwr(wchar_t *);
++ wchar_t *_wcsupr(wchar_t *);
++ 
++ #define wcsdup    _wcsdup
++ #define wcsicmp   _wcsicmp
++ #define wcsnicmp  _wcsnicmp
++ #define wcsnset   _wcsnset
++ #define wcsrev    _wcsrev
++ #define wcsset    _wcsset
++ #define wcslwr    _wcslwr
++ #define wcsupr    _wcsupr
++ 
++ size_t strlen(const char *);
++ int    strcmp(const char *, const char *);
++ char  *strcat(char *, const char *);
++ char  *strcpy(char *, const char *);
++ 
++ char  *strchr(const char *, int);
++ size_t strcspn(const char *, const char *);
++ char  *strncat(char *, const char *, size_t);
++ int    strncmp(const char *, const char *, size_t);
++ char  *strncpy(char *, const char *, size_t);
++ char  *strstr(const char *, const char *);
++ char  *strtok(char *, const char *);
++ 
++ #ifdef __cplusplus
++ }
++ #endif
++ #endif
++ 
+diff -cNr include.orig/windef.h include/windef.h
+*** include.orig/windef.h	Sat Apr  6 14:48:26 2002
+--- include/windef.h	Sat Apr  6 14:48:26 2002
+***************
+*** 48,63 ****
+--- 48,79 ----
+  #ifdef __GNUC__
+  #define PACKED __attribute__((packed))
+  #ifndef _stdcall
++ #ifdef _X86_
+  #define _stdcall __attribute__((stdcall))
++ #else
++ #define _stdcall
++ #endif
+  #endif
+  #ifndef __stdcall
++ #ifdef _X86_
+  #define __stdcall __attribute__((stdcall))
++ #else
++ #define __stdcall
++ #endif
+  #endif
+  #ifndef _cdecl
++ #ifdef _X86_
+  #define _cdecl __attribute__((cdecl))
++ #else
++ #define _cdecl
++ #endif
+  #endif
+  #ifndef __cdecl
++ #ifdef _X86_
+  #define __cdecl __attribute__((cdecl))
++ #else
++ #define __cdecl
++ #endif
+  #endif
+  #ifndef __declspec
+  #define __declspec(e) __attribute__((e))
+diff -cNr include.orig/winnt.h include/winnt.h
+*** include.orig/winnt.h	Sat Apr  6 14:48:26 2002
+--- include/winnt.h	Sat Apr  6 14:48:26 2002
+***************
+*** 19,24 ****
+--- 19,26 ----
+  #define _PPC_
+  #elif defined(_M_MRX000) && !defined(_MIPS_)
+  #define _MIPS_
++ #elif defined(_MIPSEL) && !defined(_MIPS_)
++ #define _MIPS_
+  #elif defined(_M_M68K) && !defined(_68K_)
+  #define _68K_
+  #endif
+***************
+*** 1515,1521 ****
+  #endif
+  } CONTEXT;
+  
+! #elif defined(MIPS)
+  
+  /* The following flags control the contents of the CONTEXT structure. */
+  
+--- 1517,1523 ----
+  #endif
+  } CONTEXT;
+  
+! #elif defined(_MIPS_)
+  
+  /* The following flags control the contents of the CONTEXT structure. */
+  

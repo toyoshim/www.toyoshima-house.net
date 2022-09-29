@@ -1,0 +1,19 @@
+/*
+ * common.css $Id: work.css,v 1.1 2005/01/17 10:04:50 toyoshim Exp $
+ */
+
+div.work_l {
+ float: left;
+ filter: progid:DXImageTransform.Microsoft.shadow(color=#8888aa, direction=135, strength=3);
+ padding: 4px;
+ background-color: #eeeef0;
+ border: 1px solid #cccccc;
+}
+
+div.work_r {
+ float: right;
+ filter: progid:DXImageTransform.Microsoft.shadow(color=#8888aa, direction=135, strength=3);
+ padding: 4px;
+ background-color: #eeeef0;
+ border: 1px solid #cccccc;
+}

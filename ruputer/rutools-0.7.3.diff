@@ -1,0 +1,89 @@
+diff -cNr rutools-0.7.3/ftr/Makefile rutools-0.7.3+/ftr/Makefile
+*** rutools-0.7.3/ftr/Makefile	Mon Mar 15 12:49:08 1999
+--- rutools-0.7.3+/ftr/Makefile	Tue Sep 18 09:06:45 2001
+***************
+*** 6,12 ****
+  OBJS = ftr.o
+  CC = gcc
+  RULIBDIR = ../rulib
+! CFLAGS = -Wall -O
+  #CFLAGS = -Wall -g -DDEBUG
+  
+  all		: $(TARGET)
+--- 6,12 ----
+  OBJS = ftr.o
+  CC = gcc
+  RULIBDIR = ../rulib
+! #CFLAGS = -Wall -O
+  #CFLAGS = -Wall -g -DDEBUG
+  
+  all		: $(TARGET)
+diff -cNr rutools-0.7.3/ruutils/sf2bin.c rutools-0.7.3+/ruutils/sf2bin.c
+*** rutools-0.7.3/ruutils/sf2bin.c	Tue Jan 26 15:49:48 1999
+--- rutools-0.7.3+/ruutils/sf2bin.c	Tue Sep 18 08:56:35 2001
+***************
+*** 62,67 ****
+--- 62,82 ----
+      return r;
+  }
+  
++ static dword_t
++ getdword_3(FILE *fp)
++ {
++     int		i;
++     int		ch;
++     dword_t	r = 0;
++ 
++     for (i = 0; i < 6; ++i) {
++ 	if ((ch = fgetc(fp)) == EOF)
++ 	    err_eof();
++ 	r = (r << 4) + (dword_t)HEX2BIN(ch);
++     }
++     return r;
++ }
++ 
+  int
+  main(int argc, char *argv[])
+  {
+***************
+*** 113,125 ****
+  		;
+  	    continue;
+  
+  	case '3':		/* four byte address data record */
+  	    llen = getbyte(f_in);
+  	    if (first_p) {		/* load address */
+! 		load_addr = addr = getdword(f_in);
+  		first_p = FALSE;
+  	    } else {
+! 		start_addr = getdword(f_in);
+  		while (addr < start_addr) {
+  		    fputc(0, f_out);
+  		    ++ addr;
+--- 128,143 ----
+  		;
+  	    continue;
+  
++ 	case '2':		/* three byte address data record */
+  	case '3':		/* four byte address data record */
+  	    llen = getbyte(f_in);
++ 	    if ('2' == ch)
++ 		llen++;
+  	    if (first_p) {		/* load address */
+! 		load_addr = addr = ('2' == ch)? getdword_3(f_in): getdword(f_in);
+  		first_p = FALSE;
+  	    } else {
+! 		start_addr = ('2' == ch)? getdword_3(f_in): getdword(f_in);
+  		while (addr < start_addr) {
+  		    fputc(0, f_out);
+  		    ++ addr;
+***************
+*** 140,145 ****
+--- 158,164 ----
+  	    break;
+  
+  	case '7':		/* four byte address termination record */
++ 	case '8':		/* three byte address termination record */
+  	    final_p = TRUE;
+  	    break;
+  

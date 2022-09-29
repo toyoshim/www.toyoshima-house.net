@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Schema name="elpointSchema" xmlns="urn:schemas-microsoft-com:xml-data" xmlns:dt="urn:schemas-microsoft-com:datatypes">
+	<AttributeType name="width" dt:type="int" required="yes"/>
+	<AttributeType name="height" dt:type="int" required="yes"/>
+	<AttributeType name="id" dt:type="int" required="yes"/>
+	<AttributeType name="name" dt:type="string" required="yes"/>
+	<AttributeType name="size" dt:type="int" required="yes"/>
+	<AttributeType name="path" dt:type="uri" required="yes"/>
+	<AttributeType name="type" dt:type="string" required="yes"/>
+	<AttributeType name="src" dt:type="uri" required="yes"/>
+	<AttributeType name="reload" dt:type="boolean" required="yes"/>
+	<AttributeType name="loop" dt:type="boolean" required="yes"/>
+	<AttributeType name="hide" dt:type="boolean" required="yes"/>
+	<AttributeType name="state" dt:type="boolean" required="yes"/>
+	<AttributeType name="x" dt:type="int" required="yes"/>
+	<AttributeType name="y" dt:type="int" required="yes"/>
+	<AttributeType name="color" dt:type="string" required="yes"/>
+	<ElementType name="elpoint" content="eltOnly" order="seq">
+		<element type="system"/>
+		<element type="script" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="system" content="eltOnly" order="many">
+		<element type="title" minOccurs="0"/>
+		<element type="screen" minOccurs="0"/>
+		<element type="start" minOccurs="0"/>
+		<element type="font" minOccurs="0"/>
+		<element type="base" minOccurs="0"/>
+	</ElementType>
+	<ElementType name="title" content="textOnly"/>
+	<ElementType name="screen" content="empty">
+		<attribute type="width" default="640"/>
+		<attribute type="height" default="480"/>
+	</ElementType>
+	<ElementType name="start" content="empty">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+	</ElementType>
+	<ElementType name="font" content="empty">
+		<attribute type="size" required="no"/>
+		<attribute type="name" required="no"/>
+	</ElementType>
+	<ElementType name="base" content="empty">
+		<attribute type="path"/>
+	</ElementType>
+	<ElementType name="script" content="eltOnly" order="many">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+		<element type="music" maxOccurs="*"/>
+		<element type="sound" maxOccurs="*"/>
+		<element type="text" maxOccurs="*"/>
+		<element type="message" maxOccurs="*"/>
+		<element type="flag" maxOccurs="*"/>
+		<element type="select" maxOccurs="*"/>
+		<element type="graphic" maxOccurs="*"/>
+		<element type="screeneffect" maxOccurs="*"/>
+		<element type="if" maxOccurs="*"/>
+		<element type="goto" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="music" content="empty" order="one">
+		<attribute type="type" required="no"/>
+		<attribute type="src" required="no"/>
+		<attribute type="reload" default="false"/>
+		<attribute type="loop" default="false"/>
+	</ElementType>
+	<ElementType name="sound" content="empty" order="one">
+		<attribute type="type" required="no"/>
+		<attribute type="src" required="no"/>
+		<attribute type="reload" default="false"/>
+		<attribute type="loop" default="false"/>
+	</ElementType>
+	<ElementType name="text" content="empty">
+		<attribute type="hide" default="false"/>
+	</ElementType>
+	<ElementType name="br" content="empty"/>
+	<ElementType name="message" content="mixed">
+		<element type="br" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="flag" content="empty">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+		<attribute type="state" default="true"/>
+	</ElementType>
+	<ElementType name="select" content="eltOnly">
+		<element type="item" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="item" content="textOnly">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+	</ElementType>
+	<ElementType name="graphic" content="empty">
+		<attribute type="id" default="1"/>
+		<attribute type="type" required="no"/>
+		<attribute type="src" required="no"/>
+		<attribute type="x" default="0"/>
+		<attribute type="y" default="0"/>
+		<attribute type="width" required="no"/>
+		<attribute type="height" required="no"/>
+	</ElementType>
+	<ElementType name="screeneffect" content="empty">
+		<attribute type="type" required="yes"/>
+		<attribute type="color" default="#000000"/>
+	</ElementType>
+	<ElementType name="if" content="eltOnly" order="many">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+		<attribute type="state" default="true"/>
+		<element type="music" maxOccurs="*"/>
+		<element type="sound" maxOccurs="*"/>
+		<element type="text" maxOccurs="*"/>
+		<element type="message" maxOccurs="*"/>
+		<element type="flag" maxOccurs="*"/>
+		<element type="select" maxOccurs="*"/>
+		<element type="graphic" maxOccurs="*"/>
+		<element type="screeneffect" maxOccurs="*"/>
+		<element type="if" maxOccurs="*"/>
+		<element type="goto" maxOccurs="*"/>
+	</ElementType>
+	<ElementType name="goto" content="empty">
+		<attribute type="id" required="no"/>
+		<attribute type="name" required="no"/>
+	</ElementType>
+</Schema>

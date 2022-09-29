@@ -1,0 +1,430 @@
+diff -cNr upnpsdk-1.0.4.orig/makefile upnpsdk-1.0.4.pth/makefile
+*** upnpsdk-1.0.4.orig/makefile	Thu Aug 16 03:20:11 2001
+--- upnpsdk-1.0.4.pth/makefile	Mon May  3 05:58:52 2004
+***************
+*** 102,118 ****
+  	@if [ -f "doc/upnpsdk.aux" ]; then rm doc/upnpsdk.aux; fi
+  
+  install: upnp
+! 	@install -d /usr/include/upnp
+! 	@install -d /usr/include/upnp/upnpdom
+! 	@install -d /usr/include/upnp/tools
+! 	@install bin/libupnp.so /usr/lib/libupnp.so.$(VERSION)
+! 	ln -s /usr/lib/libupnp.so.$(VERSION) /usr/lib/libupnp.so
+! 	@install inc/*.h /usr/include/upnp
+! 	@install inc/upnpdom/*.h /usr/include/upnp/upnpdom
+! 	@install inc/tools/*.h /usr/include/upnp/tools
+  
+  uninstall:
+! 	@if [ -d /usr/include/upnp ]; then rm -rf /usr/include/upnp; fi
+! 	@if [ -f /usr/lib/libupnp.so ]; then rm /usr/lib/libupnp.so; fi
+! 	@if [ -f /usr/lib/libupnp.so.$(VERSION) ]; then rm /usr/lib/libupnp.so.$(VERSION); fi
+  	
+--- 102,118 ----
+  	@if [ -f "doc/upnpsdk.aux" ]; then rm doc/upnpsdk.aux; fi
+  
+  install: upnp
+! 	@install -d /usr/local/include/upnp
+! 	@install -d /usr/local/include/upnp/upnpdom
+! 	@install -d /usr/local/include/upnp/tools
+! 	@install bin/libupnp.so /usr/local/lib/libupnp.so.$(VERSION)
+! 	ln -s /usr/local/lib/libupnp.so.$(VERSION) /usr/local/lib/libupnp.so
+! 	@install inc/*.h /usr/local/include/upnp
+! 	@install inc/upnpdom/*.h /usr/local/include/upnp/upnpdom
+! 	@install inc/tools/*.h /usr/local/include/upnp/tools
+  
+  uninstall:
+! 	@if [ -d /usr/local/include/upnp ]; then rm -rf /usr/local/include/upnp; fi
+! 	@if [ -f /usr/local/lib/libupnp.so ]; then rm /usr/local/lib/libupnp.so; fi
+! 	@if [ -f /usr/local/lib/libupnp.so.$(VERSION) ]; then rm /usr/local/lib/libupnp.so.$(VERSION); fi
+  	
+diff -cNr upnpsdk-1.0.4.orig/src/api/makefile upnpsdk-1.0.4.pth/src/api/makefile
+*** upnpsdk-1.0.4.orig/src/api/makefile	Fri Jun 15 09:21:33 2001
+--- upnpsdk-1.0.4.pth/src/api/makefile	Mon May  3 06:03:01 2004
+***************
+*** 32,41 ****
+  TARGET=../../bin/libupnp.so
+  
+  CC = gcc
+! CFLAGS = -Wall -fpic $(DEFS) 
+  C2FLAGS = -Wall $(DEFS) -shared -Wl,-soname,libupnp.so
+! INCLUDES = -I ../inc -I ../../inc -I ../../inc/upnpdom  -I ../inc/tools
+! LIBS = -lpthread -luuid
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+--- 32,41 ----
+  TARGET=../../bin/libupnp.so
+  
+  CC = gcc
+! CFLAGS = -Wall -fpic $(DEFS) -D_POSIX_THREAD_SYSCALL_SOFT
+  C2FLAGS = -Wall $(DEFS) -shared -Wl,-soname,libupnp.so
+! INCLUDES = -I ../inc -I ../../inc -I ../../inc/upnpdom  -I ../inc/tools -I /usr/pkg/include -I /usr/local/include
+! LIBS = -L /usr/pkg/lib -L /usr/local/lib -lpthread -luuid
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+diff -cNr upnpsdk-1.0.4.orig/src/api/upnpapi.c upnpsdk-1.0.4.pth/src/api/upnpapi.c
+*** upnpsdk-1.0.4.orig/src/api/upnpapi.c	Fri Jun 15 09:22:15 2001
+--- upnpsdk-1.0.4.pth/src/api/upnpapi.c	Mon May  3 05:58:54 2004
+***************
+*** 44,50 ****
+--- 44,54 ----
+  #include<string.h>
+  
+  #include <sys/ioctl.h>
++ #ifdef __linux__
+  #include <linux/if.h>
++ #else
++ #include <net/if.h>
++ #endif
+  #include <sys/utsname.h>
+  #include <sys/socket.h>
+  #include <netinet/in.h>
+diff -cNr upnpsdk-1.0.4.orig/src/gena/Makefile upnpsdk-1.0.4.pth/src/gena/Makefile
+*** upnpsdk-1.0.4.orig/src/gena/Makefile	Fri Jun 15 09:21:33 2001
+--- upnpsdk-1.0.4.pth/src/gena/Makefile	Mon May  3 06:03:13 2004
+***************
+*** 61,67 ****
+  
+  TARGET = $(upnp_lib_dir)/gena.o
+  
+! CFLAGS = -I$(upnp_inc_dir) -I$(upnp_src_inc_dir) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+--- 61,67 ----
+  
+  TARGET = $(upnp_lib_dir)/gena.o
+  
+! CFLAGS = -I$(upnp_inc_dir) -I$(upnp_src_inc_dir) -I/usr/pkg/include -I/usr/local/include -fpic -Wall -c -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/client_table/Makefile upnpsdk-1.0.4.pth/src/genlib/client_table/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/client_table/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/client_table/Makefile	Mon May  3 06:03:29 2004
+***************
+*** 55,61 ****
+  
+  TARGET = $(lib_dir)/client_table.o
+  
+! CFLAGS = -I$(upnp_src_inc_dir) -I$(upnp_inc_dir) -I$(xerces_install)/include -fpic -Wall -c
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 55,61 ----
+  
+  TARGET = $(lib_dir)/client_table.o
+  
+! CFLAGS = -I$(upnp_src_inc_dir) -I$(upnp_inc_dir) -I$(xerces_install)/include -I/usr/pkg/include -fpic -Wall -c -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/http_client/Makefile upnpsdk-1.0.4.pth/src/genlib/http_client/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/http_client/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/http_client/Makefile	Mon May  3 06:03:37 2004
+***************
+*** 44,50 ****
+  
+  TARGET = $(lib_dir)/http_client.o
+  
+! CFLAGS = -Wall -c -I $(upnp_src_inc_dir) -I$(upnp_inc_dir) 
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 44,50 ----
+  
+  TARGET = $(lib_dir)/http_client.o
+  
+! CFLAGS = -Wall -c -I $(upnp_src_inc_dir) -I$(upnp_inc_dir) -I/usr/pkg/include -DMSG_NOSIGNAL=0 -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/miniserver/Makefile upnpsdk-1.0.4.pth/src/genlib/miniserver/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/miniserver/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/miniserver/Makefile	Mon May  3 06:03:43 2004
+***************
+*** 52,58 ****
+  
+  all: $(objects) $(lib_dir)/miniserverall.o
+  
+! CFLAGS = -I $(inc_root) -I $(upnp_inc) -fpic -Wall -c -D_REENTRANT
+  
+  
+  ifeq ($(WEB),1)
+--- 52,58 ----
+  
+  all: $(objects) $(lib_dir)/miniserverall.o
+  
+! CFLAGS = -I $(inc_root) -I $(upnp_inc) -I /usr/pkg/include -fpic -Wall -c -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  
+  ifeq ($(WEB),1)
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/net/Makefile upnpsdk-1.0.4.pth/src/genlib/net/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/net/Makefile	Fri Jun 15 09:21:33 2001
+--- upnpsdk-1.0.4.pth/src/genlib/net/Makefile	Mon May  3 06:03:56 2004
+***************
+*** 40,46 ****
+  str_inc=$(inc_root)/genlib/meta/stream
+  lib_dir=../../lib
+  
+! CFLAGS = -I $(inc_root) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 40,46 ----
+  str_inc=$(inc_root)/genlib/meta/stream
+  lib_dir=../../lib
+  
+! CFLAGS = -I $(inc_root) -I /usr/pkg/include -fpic -Wall -c -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/net/http/Makefile upnpsdk-1.0.4.pth/src/genlib/net/http/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/net/http/Makefile	Fri Jun 15 09:21:33 2001
+--- upnpsdk-1.0.4.pth/src/genlib/net/http/Makefile	Mon May  3 06:03:51 2004
+***************
+*** 44,50 ****
+  
+  
+  #CFLAGS = -I $(inc_root) -I $(xer_inc) -I $(u_inc) -fpic -Wall -c -D_REENTRANT
+! CFLAGS = -I $(inc_root) -I $(u_inc) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 44,50 ----
+  
+  
+  #CFLAGS = -I $(inc_root) -I $(xer_inc) -I $(u_inc) -fpic -Wall -c -D_REENTRANT
+! CFLAGS = -I $(inc_root) -I $(u_inc) -I/usr/pkg/include -fpic -Wall -c -D_REENTRANT -DMSG_NOSIGNAL=0 -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/service_table/Makefile upnpsdk-1.0.4.pth/src/genlib/service_table/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/service_table/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/service_table/Makefile	Mon May  3 06:04:01 2004
+***************
+*** 45,51 ****
+  
+  TARGET = $(lib_dir)/service_table.o
+  
+! CFLAGS = -Wall -fpic -I$(upnp_src_inc_dir) -I$(upnp_inc_dir) 
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 45,51 ----
+  
+  TARGET = $(lib_dir)/service_table.o
+  
+! CFLAGS = -Wall -fpic -I$(upnp_src_inc_dir) -I$(upnp_inc_dir) -I/usr/pkg/include -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/timer_thread/Makefile upnpsdk-1.0.4.pth/src/genlib/timer_thread/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/timer_thread/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/timer_thread/Makefile	Mon May  3 06:04:06 2004
+***************
+*** 44,50 ****
+  
+  TARGET = $(lib_dir)/timer_thread.o
+  
+! CFLAGS = -c -I $(upnp_src_inc_dir) -I$(upnp_inc_dir) 
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 44,50 ----
+  
+  TARGET = $(lib_dir)/timer_thread.o
+  
+! CFLAGS = -c -I $(upnp_src_inc_dir) -I$(upnp_inc_dir)  -I/usr/pkg/include -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/tpool/Makefile upnpsdk-1.0.4.pth/src/genlib/tpool/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/tpool/Makefile	Fri Jun 15 09:21:34 2001
+--- upnpsdk-1.0.4.pth/src/genlib/tpool/Makefile	Mon May  3 06:04:11 2004
+***************
+*** 40,46 ****
+  lib_dir=../../lib
+  all: tpool.o scheduler.o interrupts.o $(lib_dir)/tpoolall.o
+  
+! CFLAGS = -I $(inc_root) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+--- 40,46 ----
+  lib_dir=../../lib
+  all: tpool.o scheduler.o interrupts.o $(lib_dir)/tpoolall.o
+  
+! CFLAGS = -I $(inc_root) -I /usr/pkg/include -fpic -Wall -c -D_REENTRANT -DSA_NOMASK=SA_NODEFER -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/util/Makefile upnpsdk-1.0.4.pth/src/genlib/util/Makefile
+*** upnpsdk-1.0.4.orig/src/genlib/util/Makefile	Fri Jun 15 09:22:16 2001
+--- upnpsdk-1.0.4.pth/src/genlib/util/Makefile	Mon May  3 06:04:17 2004
+***************
+*** 44,50 ****
+  
+  all: $(objects) $(lib_dir)/utilall.o
+  
+! CFLAGS = -I $(inc_root) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 44,50 ----
+  
+  all: $(objects) $(lib_dir)/utilall.o
+  
+! CFLAGS = -I $(inc_root) -I /usr/pkg/include -fpic -Wall -c -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+diff -cNr upnpsdk-1.0.4.orig/src/genlib/util/gmtdate.cpp upnpsdk-1.0.4.pth/src/genlib/util/gmtdate.cpp
+*** upnpsdk-1.0.4.orig/src/genlib/util/gmtdate.cpp	Fri Jun 15 09:22:16 2001
+--- upnpsdk-1.0.4.pth/src/genlib/util/gmtdate.cpp	Mon May  3 05:58:55 2004
+***************
+*** 41,47 ****
+--- 41,52 ----
+  #include <stdlib.h>
+  #include <ctype.h>
+  #include <string.h>
++ #ifndef __NetBSD__
+  #include <values.h>
++ #else
++ #include <limits.h>
++ #define MAXINT INT_MAX
++ #endif
+  #include <genlib/util/gmtdate.h>
+  #include <genlib/util/miscexceptions.h>
+  
+diff -cNr upnpsdk-1.0.4.orig/src/inc/genlib/tpool/tpool.h upnpsdk-1.0.4.pth/src/inc/genlib/tpool/tpool.h
+*** upnpsdk-1.0.4.orig/src/inc/genlib/tpool/tpool.h	Fri Jun 15 09:22:16 2001
+--- upnpsdk-1.0.4.pth/src/inc/genlib/tpool/tpool.h	Mon May  3 05:58:57 2004
+***************
+*** 36,42 ****
+--- 36,44 ----
+  #define GENLIB_TPOOL_TPOOL_H
+  
+  #include <stdio.h>
++ #ifndef __NetBSD__
+  #include <semaphore.h>
++ #endif
+  #include <pthread.h>
+  
+  #include <genlib/tpool/scheduler.h>
+diff -cNr upnpsdk-1.0.4.orig/src/soap/makefile upnpsdk-1.0.4.pth/src/soap/makefile
+*** upnpsdk-1.0.4.orig/src/soap/makefile	Fri Jun 15 09:21:11 2001
+--- upnpsdk-1.0.4.pth/src/soap/makefile	Mon May  3 06:04:37 2004
+***************
+*** 32,39 ****
+  TARGET=../lib/soap.o
+  
+  CC = gcc
+! CFLAGS =  -fpic -c -Wall
+! INCLUDES = -I. -I../inc -I../../inc
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+--- 32,39 ----
+  TARGET=../lib/soap.o
+  
+  CC = gcc
+! CFLAGS =  -fpic -c -Wall -D_POSIX_THREAD_SYSCALL_SOFT
+! INCLUDES = -I. -I../inc -I../../inc -I/usr/pkg/include
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+diff -cNr upnpsdk-1.0.4.orig/src/ssdp/makefile upnpsdk-1.0.4.pth/src/ssdp/makefile
+*** upnpsdk-1.0.4.orig/src/ssdp/makefile	Fri Jun 15 09:21:35 2001
+--- upnpsdk-1.0.4.pth/src/ssdp/makefile	Mon May  3 06:04:47 2004
+***************
+*** 32,40 ****
+  TARGET=../lib/ssdp.o
+  
+  CC = gcc
+! CFLAGS =  -fpic -c -Wall
+  LDFLAGS =   -g -shared -Wl,-soname,ssdpres.so.0 -o ssdpres.so.0.0  /usr/lib/libpthread.so -lc
+! INCLUDES = -I. -I../inc -I../../inc
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+--- 32,40 ----
+  TARGET=../lib/ssdp.o
+  
+  CC = gcc
+! CFLAGS =  -fpic -c -Wall -D_POSIX_THREAD_SYSCALL_SOFT
+  LDFLAGS =   -g -shared -Wl,-soname,ssdpres.so.0 -o ssdpres.so.0.0  /usr/lib/libpthread.so -lc
+! INCLUDES = -I. -I../inc -I../../inc -I/usr/pkg/include
+  
+  ifeq ($(DEBUG),1)
+  CFLAGS += -g -O -DDEBUG
+diff -cNr upnpsdk-1.0.4.orig/src/ssdp/ssdplib.c upnpsdk-1.0.4.pth/src/ssdp/ssdplib.c
+*** upnpsdk-1.0.4.orig/src/ssdp/ssdplib.c	Thu Aug 16 03:17:31 2001
+--- upnpsdk-1.0.4.pth/src/ssdp/ssdplib.c	Mon May  3 06:23:05 2004
+***************
+*** 403,409 ****
+      bzero((char *)&SelfAddr, sizeof(struct sockaddr_in));
+  
+      SelfAddr.sin_family = AF_INET;
+!     SelfAddr.sin_addr.s_addr = inet_addr(SSDP_IP);
+      SelfAddr.sin_port = htons(SSDP_PORT);
+      if (bind( SsdpSock, (struct sockaddr *) &SelfAddr, sizeof(SelfAddr)) != 0)
+      {
+--- 403,409 ----
+      bzero((char *)&SelfAddr, sizeof(struct sockaddr_in));
+  
+      SelfAddr.sin_family = AF_INET;
+!     SelfAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+      SelfAddr.sin_port = htons(SSDP_PORT);
+      if (bind( SsdpSock, (struct sockaddr *) &SelfAddr, sizeof(SelfAddr)) != 0)
+      {
+diff -cNr upnpsdk-1.0.4.orig/src/upnpdom/Makefile upnpsdk-1.0.4.pth/src/upnpdom/Makefile
+*** upnpsdk-1.0.4.orig/src/upnpdom/Makefile	Fri Jun 15 09:22:16 2001
+--- upnpsdk-1.0.4.pth/src/upnpdom/Makefile	Mon May  3 06:05:08 2004
+***************
+*** 34,44 ****
+  CCPP = g++
+  PLATFORM = LINUX
+  COMPILER = g++
+! CXXFLAGS = -w -O
+! CFLAGS = -fpic -Wall -D_REENTRANT  
+  PREFIX = /usr/local
+  LIBS =  
+! INCLUDE = -I ../../inc/upnpdom -I ../inc
+  lib_dir=../lib
+  
+  all: $(lib_dir)/upnpdom.o
+--- 34,44 ----
+  CCPP = g++
+  PLATFORM = LINUX
+  COMPILER = g++
+! CXXFLAGS = -w -O -D_POSIX_THREAD_SYSCALL_SOFT
+! CFLAGS = -fpic -Wall -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  PREFIX = /usr/local
+  LIBS =  
+! INCLUDE = -I ../../inc/upnpdom -I ../inc -I /usr/pkg/include
+  lib_dir=../lib
+  
+  all: $(lib_dir)/upnpdom.o
+diff -cNr upnpsdk-1.0.4.orig/src/urlconfig/Makefile upnpsdk-1.0.4.pth/src/urlconfig/Makefile
+*** upnpsdk-1.0.4.orig/src/urlconfig/Makefile	Fri Jun 15 09:21:36 2001
+--- upnpsdk-1.0.4.pth/src/urlconfig/Makefile	Mon May  3 06:05:16 2004
+***************
+*** 46,52 ****
+  lib_dir=../lib
+  all: urlconfig.o $(lib_dir)/urlconfigall.o
+  
+! CFLAGS = -I $(upnp_root) -I $(genlib_r) -I $(url_inc) -fpic -Wall -c -D_REENTRANT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER
+--- 46,52 ----
+  lib_dir=../lib
+  all: urlconfig.o $(lib_dir)/urlconfigall.o
+  
+! CFLAGS = -I $(upnp_root) -I $(genlib_r) -I $(url_inc) -I /usr/pkg/include -fpic -Wall -c -D_REENTRANT -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  ifeq ($(WEB),1)
+  CFLAGS += -DINTERNAL_WEB_SERVER

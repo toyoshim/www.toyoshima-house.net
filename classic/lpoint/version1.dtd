@@ -1,0 +1,2 @@
+<!ELEMENT	lpoint	(head, body)>
+<!ELEMENT	head	EMPTY>

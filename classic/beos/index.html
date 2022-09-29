@@ -1,0 +1,470 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888" vlink="#ee7777" bgcolor="#005555">
+
+		<!-- ### タイトル ### -->
+		<!--hr width="80%"-->
+		<div align="center">
+			<!--<font size="+4"><font color="#4444ff">B</font><font color="#ff0000">e</font></font>-->
+			<table>
+				<tr bgcolor="#448844"><td height="1"></td></tr>
+				<tr bgcolor="#224422"><td height="1"></td></tr>
+				<tr><td>
+					<img src="./be.jpg">&nbsp;
+					<font size="+2">a </font><font size="+3" color="#ffffff">す～ぱ～まん。</font>
+				</td></tr>
+				<tr bgcolor="#448844"><td height="1"></td></tr>
+				<tr bgcolor="#224422"><td height="1"></td></tr>
+			</table>
+		</div>
+		<!--hr width="80%"-->
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■What's new ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">What's new</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			スクリーンショットと近況（2001/2/28）。
+			<br>&nbsp;
+			スクリーンショットだけ（汗（2001/2/17）。
+			<br>&nbsp;
+			近況を更新（2001/2/8）。
+			<br>&nbsp;
+			「jless-332-iso248(ppc)」「jgroff-1.10(0.99)(x86/ppc)」「man-1.5g-ja(x86/ppc)」を公開（jgroffのx86版は修正版）（2001/2/3）。
+			<br>&nbsp;
+			Richard Burgessさんが移植したcronをR5で動くように修正したソース・バイナリを公開します（2001/2/2）。
+			<br>&nbsp;
+			掘り出しモン「groff-1.11+jgroff-0.99」を公開（2001/1/28）。
+			<br>&nbsp;
+			namazuに対応した!!「mhttpd-0.5.1」を公開（2001/1/25）。
+			<br>&nbsp;
+			「ICOTranslator」を公開らしー（2001/1/23）。
+			<br>&nbsp;
+			BeZillaな話し、とか（2001/1/13,2001/1/15）。
+			<br>&nbsp;
+			「BeYAME version 0.27c β3」を公開！　ですぅ♪（2001/1/7）。
+			<br>&nbsp;
+			「zmc2 v129 / ZtoM v156」を公開！　ですぅ♪（2001/1/7）。
+			<br>&nbsp;
+			「mhttpd-0.4.3」を公開！　ですぅ♪（2001/1/7）。
+			<br>&nbsp;
+			「cvs 1.11+1」を公開！　ですぅ♪（2001/1/7）。
+			<br>&nbsp;
+			微妙に更新...近々きっと...（2001/1/5）。
+			<br>&nbsp;
+			微妙に更新（2000/12/7）。
+			<br>&nbsp;
+			「TwinVQ Player / CL-Amp Plugin version 0.70」を公開！　ですぅ♪（2000/10/28）。
+			<br>&nbsp;
+			「TwinVQ Player / CL-Amp Plugin α」を公開！　ですぅ♪（2000/10/24）。
+			<br>&nbsp;
+			「<a href="dx/index.html">Dos eXecution environment for BeOS /POSIX</a>」を更新だぉ（2000/9/30）。
+			<br>&nbsp;
+			VideoLAN、ちょっと話題なんでスクリーンショットとして取り上げてみました（2000/8/19）。
+			<br>&nbsp;
+			「diswin version 0.17」を公開！　ですぅ♪（2000/8/7）
+			<br>&nbsp;
+			とりあえず「トランスパランス　α（2000/08/01）版」公開！　ですぅ♪（2000/8/1）
+			<br>&nbsp;
+			<table><!-- ### ■近況 ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">近況</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;◆
+				サーバーダウンでしくしくな今日このごろですが、いよいよBeaCon4が動き出しました。
+				win32_serverネタで私も参加予定です。dynamic relocationとか結構うまく動いてるようなんで、
+				この周辺の技術的な話なんかもできたら面白いかなー、とか。
+			<p>&nbsp;◆
+				NScripterと平行して進めてたwin32_serverプロジェクト「ExeCoffSky」が意外に進展。
+				せっかくなのでどんなもんなのか解説。<br>
+				っていうか、wineみたいなもんです。
+				Windowsの実行形式であるPE(COFF)を解釈するライブラリを作って、EXE/DLLを
+				メモリにマップ。Windowsでは、Win32APIは直接呼び出されずに、
+				外部参照のDLL内で解決されることを利用して、KERNEL32.DLL/USER32.DLL/etc...
+				等のDLL相当のものをBeOS nativeのAPIを使って再実装。
+				あとはnativeに動きますんで、動作速度も快適ですし、
+				CPUがDualなら当然Dualで動きます。<br>
+				最初はDLLはDLLとして実装しようとして、PEの吐けるgccとか移植したんですが、
+				逆にDLLからのBeAPIへの参照がうまく行かずに挫折。
+				soとして実装してWin32のダイナミックリンクをso対応にするってのも手だったんですが、
+				序数参照の問題もあったので、PEのダイナミックリンクのコードにフックをかけて
+				built-inにする、という安易な方法を取りました(^^;;<br>
+				で、利点は、<br>
+				1. WindowsのDLLがBeOSから再利用できる。<br>
+				2. WindowsのEXEの一部がBeWareとして再利用できる。<br>
+				ってあたり。
+				どちらもBeOS上のアプリケーションとして、BeWareと区別なく実行できるのが特徴
+				（いわゆるエミュのように、中にもう1つ箱ができて、その中で実行する、というわけではない）。<br>
+				EXEが一部しか対応できないのは、Windowsの実行ファイルが前提としている
+				メモリ空間にBeOS kernelのheapが存在しているためで、
+				リンク時に再配置情報がstripされているEXEは実行できません。
+				で、残念ながら最近のやつは全滅。
+				このあたりがkernelレベルでWin32をサポートするPEACEと比べて弱い点です。
+				仮想メモリドライバみたいなもんを作ってやれば、将来的には回避できるかもしれません。
+				それ以外についてはAPIさえ実装してやれば、なんでも動くはずです
+				（と言っても4桁以上あるんで、アレですが）。<br>
+				#そうそう、まともなプロジェクト名を募集します（笑）。ExeCoffSkyってのも、いかにもアレなんで。
+				BeOS/Win32/COFF/PE/execution/environment/serverあたりの単語を絡めていろいろ考えてみたんですが、
+				なかなか良いのが思いつきませんで(^^;;
+			<p>&nbsp;◆
+				<a href="http://www8.cds.ne.jp/~hama/bezilla/">はむ！</a>さんと
+				BeZillaやってます。あと、mozilla/widget/src/beos、mozilla/gfx/src/beos
+				あたりが問題残ってると思われまする。えぇ、ぜひ読んで下さい（うひ。
+				わからない点があればメールとか、IRCの「#BeOSの話」「#Be日本」あたりにごー。
+			<p>&nbsp;◆
+				ってことで、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=63640">63640</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65100">65100</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65126">65126</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65131">65131</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65185">65185</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65246">65246</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65425">65425</a>、
+				<a href="http://bugzilla.mozilla.org/show_bug.cgi?id=65909">65909</a>。<br>
+				65423と65909がまだcheck inされてない、って風味。あと、Altキー絡みはどうなったけか。
+			<br>&nbsp;
+
+			<table><!-- ### ■こんな感じ ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">こんな感じ</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			ダメなスクリーンショットをぼちぼち掲載。
+			<br>&nbsp;
+			<div align="center"><table border="2"><tr><td><img src="./screen27.jpg" width="640" height="480" alt="screen shot"></td></tr></table></div>
+			<div align="center">
+				らんらららん。
+			</div>
+			<div align="center">
+				過去 :
+				[<a href="./screen1.jpg">1</a>]
+				[<a href="./screen2.jpg">2</a>]
+				[<a href="./screen3.jpg">3</a>]
+				[<a href="./screen4.jpg">4</a>]
+				[<a href="./screen5.jpg">5</a>]
+				[<a href="./screen6.jpg">6</a>]
+				[<a href="./screen7.jpg">7</a>]
+				[<a href="./screen8.jpg">8</a>]
+				[<a href="./screen8a.jpg">8a</a>]
+				[<a href="./screen9.jpg">9</a>]
+				[<a href="./screen10.jpg">10</a>]
+				[<a href="./screen11.jpg">11</a>]
+				[<a href="./screen12.jpg">12</a>]
+				[<a href="./screen13.jpg">13</a>]
+				[<a href="./screen14.jpg">14</a>]
+				[<a href="./screen15.jpg">15</a>]
+				[<a href="./screen16.jpg">16</a>]
+				[<a href="./screen17.jpg">17</a>]
+				[<a href="./screen18.jpg">18</a>]
+				[<a href="./screen19.jpg">19</a>]
+				[<a href="./screen20.jpg">20</a>]
+				[<a href="./screen21.jpg">21</a>]
+				[<a href="./screen22.jpg">22</a>]
+				[<a href="./screen23.jpg">23</a>]
+				[<a href="./screen24.jpg">24</a>]
+				[<a href="./screen25.jpg">25</a>]
+				[<a href="./screen26.jpg">26</a>]
+			</div>
+
+			<table><!-- ### ■自作BeWare ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">自作BeWare</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			多少は作ってるので、ちょっと紹介します。
+			<blockquote>
+				<table bgcolor="#ffffff">
+					<tr><!-- ### BeYame ### -->
+						<td bgcolor="#ccccff" width="120"><a href="./arcs/BeYAME.zip"><font color="#000000">BeYAME(x86/ppc) ～ old version</font></a><div align="right"><font color="#000000" size="-1">[1999/夏コミ]</font></div><a href="./arcs/BeYAME-0.27c-b3.zip"><font color="#000000">BeYAME(x86) ～ new version</font></a><div align="right"><font color="#000000" size="-1">[2001/1/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							いわゆるエミュレータです。PC-Engine、ファミコン、GameBoyが動きます。
+							大学のサークルの先輩が作ったものを移植したものです。
+							他にもWindows版やMacintosh版、X版、PC-FX版、PlayStation版なども存在し、
+							謎の多いエミュレータです。旧版はBeでの習作ということもあるので、結構手抜きです。
+							新版はGUIをXMLベースにしてみたりと、いろいろやってます。
+						</font></td>
+					</tr>
+					<tr><!-- ### mcdrv ### -->
+						<td bgcolor="#ccccff"><a href="../mcdrv/index.htm"><font color="#000000">mcdrv(link)</font></a><div align="right"><font color="#000000" size="-1">[2000/5/28]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							X68000で有名だったCUL.さん作のミュージックドライバを移植したものです。
+							FM音源をエミュレートします。現在はコマンドラインのみのサポート。
+							いずれCL-AMPのPlug-inも作りたいなぁ、、、と。
+							Run68を移植したのでMDXとかもそのうちいけるようになる予定。
+						</font></td>
+					</tr>
+					<tr><!-- ### PDT Translator ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/PDTTranslator.zip"><font color="#000000">PDT Translator(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/5/25]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							うぐぅ、なTranslatorです。すでに何人かの方が作っていたようですが、、、。
+						</font></td>
+					</tr>
+					<tr><!-- ### PF1 Translator ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/PF1Translator.zip"><font color="#000000">PF1 Translator(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/5/29]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							サターン版のプリティサミーとか、Windows版の大運動会とかの画像のTranslatorです。
+							むしり取った衣笠ってやつですか。
+						</font></td>
+					</tr>
+					<tr><!-- ### ICO Translator ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/ICOTranslator.zip"><font color="#000000">ICO Translator(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/1/23]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							Windowsのiconファイル用っす。ソースも入れようとしてたら忘れてしまいました(^^;;
+							要望とかバージョンアップがあれば新しいのアップします（うひ。
+						</font></td>
+					</tr>
+					<tr><!-- ### run68 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/run68_008-beos-x86.zip"><font color="#000000">run68(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/5/28]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							X68000のコマンドラインをエミュレーションします。
+							mcdrvからMDXなどを演奏する際に活用できます
+							（が、まだBeOS用のmcdrvは対応していない、、、）。
+							とりあえず公開。
+						</font></td>
+					</tr>
+					<tr><!-- ### iso9660s ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/iso9660s_000610.zip"><font color="#000000">iso9660s(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/6/10]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							BeOS R5標準添付のISO9660ドライバではJoliet以外のCD-ROMで日本語がうまく扱えません。
+							ということで、ShiftJISに対応させました。sample-codeのiso9660をベースにしています。
+						</font></td>
+					</tr>
+					<tr><!-- ### NcFTP3.0.1 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/ncftp-3.0.1-beos-x86.zip"><font color="#000000">NcFTP3.0.1(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/6/30]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							UNIXでメジャーな高機能ftpクライアント、NcFTPの最新版であるv3.0.1の移植です。
+							コンパイルの合間にいじっていたら、いつの間にやらまともに動くようになってました。
+							v3系列は移植されていないようですので、パッチと一緒に公開します。
+						</font></td>
+					</tr>
+					<tr><!-- ### w3m 0.1.10 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/w3m-0.1.10-beos-x86-pl2.zip"><font color="#000000">w3m 0.1.10(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/7/3]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							伊藤彰則さん開発によるテキストベースのWWWブラウザ、w3mのBeOS版です。
+							GCやらfdopen絡みで、結構苦労してます。
+							まぁ、Mozillaまでの繋ぎですね(^^;;
+							ソースは整備してないのですが連絡を頂ければ送ります。
+							7/1版にはダウンロードに問題がありました。申し訳ありません。
+						</font></td>
+					</tr>
+					<tr><!-- ### トランスパランス ### -->
+						<td bgcolor="#ccccff"><a href="./ww/tp20000801.zip"><font color="#000000">トランスパランス α（2000/08/01）版(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/8/1]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							BeOS⇔WonderWitch間でデータ転送を行うためのソフト。
+							とりあえず使えるって状態になったので公開開始します。
+							適宜更新予定。
+						</font></td>
+					</tr>
+					<tr><!-- ### cvs-1.11+1 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/cvs-1.11+1-beos.zip"><font color="#000000">cvs-1.11+1(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/1/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							CVS最新版です。ソースの差分とインストーラ付き。
+							mozillaのco/update時などに起きるrmdirの問題に対処しました。
+							あとはシングルユーザーOS向けのアクセス制御機構の導入とか。
+						</font></td>
+					</tr>
+					<tr><!-- ### mhttpd-0.5.1 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/mhttpd-0.5.1.zip"><font color="#000000">mhttpd-0.5.1(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/1/25]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							CGIの使えるWebServerです。そこそこ遊べます。
+							アイコンが付きました（意味ない...）。
+							minibbsとかnamazuもそのまま動きます(^^)。
+						</font></td>
+					</tr>
+					<tr><!-- ### TwinVQ alpha ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/TwinVQ-0.70-beos-x86.zip"><font color="#000000">TwinVQ Player / CL-Amp Plugin version 0.70(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/10/28]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							TwinVQのTerminal用のプレイヤーと、CL-Amp用のinput pluginです。
+							Linux用のライブラリをBeOSでリンクする実験だったりもします。
+							α版からの変更点はメモリリークの修正、MIMEのサポート、Shift_JISな曲名の対処です。
+						</font></td>
+					</tr>
+					<tr><!-- ### lha ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/lha-1.14f.zip"><font color="#000000">lha 1.14f(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/5/28]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							単なるコマンドライン用のlhaです。
+							探すよりコンパイルするほうが速かったんで、ソースとってきてコンパイルしました。
+							ほとんど修正なしで通ってます。
+						</font></td>
+					</tr>
+					<!--
+					<tr><!-/- ### Perl5 ### -/->
+						<td bgcolor="#ccccff"><a href="./arcs/perl5.00503.zip"><font color="#000000">Perl5.00503(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/6/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+							BeBitsのリンクがきれてたので例によってソースを取ってきてコンパイル。
+							ソケットが使えるようになってるとか、実は最新の5.6系列だとか、
+							そんな気の利いたことはしてません。
+						</font></td>
+					</tr>
+					-->
+					<tr><!-- ### zmc2v129 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/zmc2v129_beos_x86.zip"><font color="#000000">zmc2v129(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/1/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						Z-MUSICでのMIDI環境ってことで、ZMUSIC Version2.x系列のMMLコンパイラです。
+						わいやぎさんが開発したものをコンパイルしてみました。詳しくは、わいやぎさんの</font>
+						<a href="http://www2s.biglobe.ne.jp/~yyagi/program.html">Z-MUSICをX680x0以外の環境で実現する（フリーソフト）</a><font color="#444444">のページへどうぞ。
+						</font></td>
+					</tr>
+					<tr><!-- ### ZtoMv156 ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/ztomv156_beos_x86.zip"><font color="#000000">ZtoMv156(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/1/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						Z-MUSICでのMIDI環境第２段ってことで、ZMD to MIDコンバータです。
+						BeOSではZ-MUSIC Playerが存在しないので、上のやつ単体では意味をなしません。
+						まぁ、頑張ればmcdrvでZ-MUSICも再生できるんですが(汗)。
+						どのみち作ったものを世に出すには必須でしょう。これまたわいやぎさん開発。
+						</font></td>
+					</tr>
+					<tr><!-- ### less-332-iso248 ### -->
+						<td bgcolor="#ccccff"><font color="#000000">less-332-iso248(</font><a href="./arcs/less-332-iso248.zip"><font color="#000000">x86</font></a><font color="#000000">/</font><a href="./arcs/less-332-iso248-ppc.zip"><font color="#000000">ppc</font></a><font color="#000000">)</font><div align="right"><font color="#000000" size="-1">x86[2000/7/6]<br>ppc[2001/2/3]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						一応コンパイルしたのでアップしておきます。
+						less 332にiso patch 248を適用したものです。
+						例によってコンパイルしただけなのでUTF-8は考慮されていないのですが、
+						MuTermを使っていればLESSCHARSET=japanese-jisでそこそこ便利に使えます。
+						日本語対応のgroffと日本語対応のmanと組み合わせれば日本語manも表示可能。<br>
+						（2001/7/6 PPC用バイナリを追加）
+						</font></td>
+					</tr>
+					<tr><!-- ### groff-1.10 + jgroff-0.99 ### -->
+						<td bgcolor="#ccccff"><font color="#000000">jgroff-1.10-beos(</font><a href="./arcs/jgroff-1.10-beos-x86.zip"><font color="#000000">x86</font></a><font color="#000000">/</font><a href="./arcs/jgroff-1.10-beos-ppc.zip"><font color="#000000">ppc</font></a><font color="#000000">)</font><div align="right"><font color="#000000" size="-1">[2001/2/3]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						groff-1.10にjgroff-0.99のパッチをあてて、
+						BeOSでコンパイルできるように手直ししたものです。
+						いわゆる日本語の通るroffで、日本語man環境に必要です。
+						export GROFF_TYPESETTER="nippon"としておいて下さい。<br>
+						（2001/2/2以前のx86版には足りないファイルがありました。</font>
+						<a href="./arcs/jgroff-1.10+-beos.zip">差分</a>
+						<font color="#444444">のインストーラを用意しましたので御利用下さい。）
+						</font></td>
+					</tr>
+					<tr><!-- ### man-1.5g-ja ### -->
+						<td bgcolor="#ccccff"><font color="#000000">man-1.5g-ja(</font><a href="./arcs/man-1.5g-ja-x86.zip"><font color="#000000">x86</font></a><font color="#000000">/</font><a href="./arcs/man-1.5g-ja-ppc.zip"><font color="#000000">ppc</font></a><font color="#000000">)</font><div align="right"><font color="#000000" size="-1">[2001/2/3]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						man-1.5g-jaです。これで日本語man環境はx86/ppcともにそろいました(^^)。
+						</font></td>
+					</tr>
+					<tr><!-- ### diswin-0.17.zip ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/diswin-0.17.zip"><font color="#000000">diswin-0.17(x86)</font></a><div align="right"><font color="#000000" size="-1">[2000/8/7]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						雨がやむまでの時間潰しにサクッとコンパイル。
+						あると便利なdiswin。これを使って頑張って下さい（笑）＞ＫＴ。
+						オリジナル版は</font><a href="http://plaza4.mbn.or.jp/~iruka/">IKURA</a><font color="#444444">さん。
+						</font></td>
+					</tr>
+					<tr><!-- ### cron-r5-x86.zip ### -->
+						<td bgcolor="#ccccff"><a href="./arcs/cron-r5-x86.zip"><font color="#000000">cron-r5(x86)</font></a><div align="right"><font color="#000000" size="-1">[2001/2/2]</font></div></td>
+						<td bgcolor="#ffcccc"><font color="#444444">
+						Richard Burgessさんが移植したcronをR5に合わせて修正・コンパイルし直したものです。
+						ソースごと入ってます。
+						</font></td>
+					</tr>
+				</table>
+			</blockquote>
+
+			<table><!-- ### ■Tips ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">Tips</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			ちょっとした技とか。さっさと書けって感じ。
+
+			<blockquote>
+				●<a href="./tips_make.html">GNU makeで並列コンパイル</a>
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+				●<a href="./tips_expander.html">LZHファイルをExpanderから扱えるようにする方法</a>
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+				●<a href="./tips_duprtr.html">Rubyを使った楽々Dial-up Router制御法</a>
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+				●シェルスクリプトで作るWindows風スタートアップ機能(執筆中)
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+				●CDからmp3へ一括変換、PerlでID3Tagの設定まで(執筆中)
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+			</blockquote>
+
+			<table><!-- ### ■Libraries ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">Libraries</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			自作のライブラリ群。なるべくBeらしく設計したつもり。
+			
+			<blockquote>
+				●<a href="./lib_http.html">HTTPを扱うためのライブラリ</a>
+				<div align="center"><table width="90%"><tr><td>
+				</td></tr></table></div>
+				●<a href="lib_midi.html">新MidiKitでSMF/SoftMIDIを扱うためのライブラリ</a>
+				</td></tr></table></div>
+			</blockquote>
+
+			<table><!-- ### ■Beなマシン ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">Beなマシン</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			一応、こんなマシンでBeを使ってます、、、ってことで。
+			
+			<blockquote>
+				●PPC: Power Macintosh 8600/250
+				<div align="center"><table width="90%"><tr><td>
+					HD増設した以外、特にいじってありません。
+					OS8.5とMkLinux、Linux、BeOS 4.5の計4つのOSからブート可能です。
+				</td></tr></table></div>
+				●x86: 自作 ←元メイン
+				<div align="center"><table width="90%"><tr><td>
+					BH-6にCeleron300ってことで、今となっては遅いマシン。
+					グラフィックはG200とVoodoo2、サウンドはCrystalとYMF744がのってます。
+					CD-ROM x 1 / DVD-ROM x 1 / CD-R x 1ってことでCDは計3つ。
+					他には640のMOとUSBのSmartMedia Reader、IF-SEGAとかが繋がってます。
+					OSはWindows98 / Windows 2000 Server / BeOS 4.5 / BeOS 5 Personal Edition の4つ。
+				</td></tr></table></div>
+				●x86: Let's note CF-C33
+				<div align="center"><table width="90%"><tr><td>
+					カメラ付きのB5ノートです。BeOS 5 Personal Editionが動いてます。
+					最初インストールした時はサウンドの調子が悪く、ノイズしかならなかったのですが、
+					DMAのチャンネルを変えてやったらうまくなりました。
+					PCMCIAブリッジが正常に認識されていないのでPCカードが使えないのが致命的ですが、、、。
+				</td></tr></table></div>
+				●x86: Mebius MN-5500
+				<div align="center"><table width="90%"><tr><td>
+					一応Beが動くんですが、Safe-ModeでIDEのDMAを無効にしないと起動しない、画面がモノクロ、
+					音もならない、、、と踏んだり蹴ったりです。
+					一時期、まるちなサイトの人が移植したCyberのドライバをこいつにも対応させよう
+					と試みたこともありましたが、挫折しました。
+				</td></tr></table></div>
+				●x86: 自作 ←メイン
+				<div align="center"><table width="90%"><tr><td>
+					Windows2000との切り替えが面倒なので作ってしまいました。
+					BeOS専用マシン。PentiumIIIの新コア650MHzのデュアルです。
+					G400、SBLive。FDが付いてないのが味噌。HDは30GすべてBe。
+					漢！
+				</td></tr></table></div>
+			</blockquote>
+
+		</blockquote>
+		<hr width="80%">
+		<div align="center">
+			<a href="../main.html" target="_top"><img src="../banner/psbanner.jpg" width="200" height="40" border="0" alt="とよしまハウス"></a>
+		</div>
+		&nbsp;<br>
+		<blockquote>
+			<div align="right">CVS 最終更新 ---- $Id: index.html,v 1.90 2001/03/05 15:42:27 toyoshim Exp $</div>
+			<div align="right">since 2000/6/3 <img src="http://www.twintail.org/cgi-bin/counter?group=woody&name=nw4&def=toyoshim_be" alt="counter"></div>
+			<div align="right">
+				<a href="http://www.be-in.org/" target="_top"><img src="http://www.be-in.org/images/be-in_icon.gif" width="110" height="40" border="0" alt="Be-IN"></a>
+				<a href="http://www.yt-works.pos.to/beos/" target="_top"><img src="http://www.yt-works.pos.to/beos/img/connect_bnn.gif" width="200" height="40" border="0" alt="Connect BeOS"></a>
+			</div>
+		</blockquote>
+	</body>
+</html>

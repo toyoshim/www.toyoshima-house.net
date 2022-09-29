@@ -1,0 +1,61 @@
+<HTML>
+	<BODY BGCOLOR="#ffffff">
+		
+		<H2><FONT COLOR="#80d080">対応プラットフォーム</FONT></H2>
+		<BLOCKQUOTE><FONT COLOR="#d080d0">
+			<P>いわゆるUNIX系のOSで利用できます。当然X Windowもしくはそれに準ずるものが動いている必要があります。ちなみに開発は主にMkLinux上で行いました。他SunOS、solaris、Linux、FreeBSDでも確認をとっています。</P>
+			<P>以前はUNIXのみの動作でしたが、tamon君がWindowsに移植しています。ということで、Windowsユーザーの方も利用できるようになりました。移植版に関してはリンクで紹介していますので、そちらを御覧下さい。</P>
+		</FONT></BLOCKQUOTE>
+
+		<H2><FONT COLOR="#80d080">ウィンドウマネージャーについて</FONT></H2>
+		<BLOCKQUOTE>
+			<FONT COLOR="#d080d0">
+				<P>このアプリケーションではフォーカスウィンドウのタイトルバーに関する情報を利用するわけですが、タイトルバー自体はウィンドウマネージャーの管理下にあるため、マネージャーによっては相性が悪いことがあるかもしれません。こちらですべてのマネージャーとの相性を確認するということは行っていないため、マネージャーによっては不都合があると思われます。何か気付いた点があったら連絡頂けると助かります。</P>
+				<P>現在、フォーカスウィンドウ追跡ルーチンの違いにより、0.80系、0.85系が存在します。それぞれ現在最も安定しているのは、0.80と0.86.1です。ウィンドウマネージャーによっては0.85系でうまく動作しない場合があるかもしれません。</P>
+				<P>現在確認されている相性は以下の通りです。最新の0.87ではほとんどの問題が改善されていると思われますが、詳しい調査をしていないため、表には載せてありません。御了承下さい。</P>
+			</FONT>
+
+			<TABLE BORDER=1>
+				<TR>
+					<TH BGCOLOR="#d0f0b0"><FONT COLOR="#301050">wm</FONT></TH>
+					<TH BGCOLOR="#d0e0f0"><FONT COLOR="#302010">相性(0.80)</FONT></TH>
+					<TH BGCOLOR="#b0f0d0"><FONT COLOR="#501030">相性(0.85)</FONT></TH>
+					<TH BGCOLOR="#d0b0f0"><FONT COLOR="#305010">備考</FONT></TH>
+				</TR>
+				<TR>
+					<TD BGCOLOR="#d0f0b0"><FONT COLOR="#301050">qvwm</FONT></TD>
+					<TD BGCOLOR="#d0e0f0"><FONT COLOR="#302010">◎</FONT></TD>
+					<TD BGCOLOR="#b0f0d0"><FONT COLOR="#501030">◎</FONT></TD>
+					<TD BGCOLOR="#d0b0f0"><FONT COLOR="#305010">最も相性が良い。特に調節したわけでもないのに背景をクリックするとタスクバー上に座る、スタートメニューにも座るなどWindowsで良く見られる光景が再現できる。</FONT></TD>
+				</TR>
+				<TR>
+					<TD BGCOLOR="#d0f0b0"><FONT COLOR="#301050">afterstep</FONT></TD>
+					<TD BGCOLOR="#d0e0f0"><FONT COLOR="#302010">◯</FONT></TD>
+					<TD BGCOLOR="#b0f0d0"><FONT COLOR="#501030">△</FONT></TD>
+					<TD BGCOLOR="#d0b0f0"><FONT COLOR="#305010">Windowサイズの変更中・移動中などは表示がきえる。 / アイコン化で問題あり。</FONT></TD>
+				</TR>
+
+				<TR>
+					<TD BGCOLOR="#d0f0b0"><FONT COLOR="#301050">fvwm2</FONT></TD>
+					<TD BGCOLOR="#d0e0f0"><FONT COLOR="#302010">◯</FONT></TD>
+					<TD BGCOLOR="#b0f0d0"><FONT COLOR="#501030">-</FONT></TD>
+					<TD BGCOLOR="#d0b0f0"><FONT COLOR="#305010">Windowサイズの変更中・移動中などは表示がきえる。</FONT></TD>
+				</TR>
+				<TR>
+					<TD BGCOLOR="#d0f0b0"><FONT COLOR="#301050">twm</FONT></TD>
+					<TD BGCOLOR="#d0e0f0"><FONT COLOR="#302010">×</FONT></TD>
+					<TD BGCOLOR="#b0f0d0"><FONT COLOR="#501030">◯</FONT></TD>
+					<TD BGCOLOR="#d0b0f0"><FONT COLOR="#305010">フォーカスがルートに移るとアニメーションが停止する。 / 問題は解決。</FONT></TD>
+				</TR>
+				<TR>
+					<TD BGCOLOR="#d0f0b0"><FONT COLOR="#301050">enlightenment</FONT></TD>
+					<TD BGCOLOR="#d0e0f0"><FONT COLOR="#302010">×</FONT></TD>
+					<TD BGCOLOR="#b0f0d0"><FONT COLOR="#501030">×</FONT></TD>
+					<TD BGCOLOR="#d0b0f0"><FONT COLOR="#305010">0番目以外のスクリーンではフォーカスウィンドウに座らずにスクリーン全体に座ってしまう。</FONT></TD>
+				</TR>
+			</TABLE>
+
+		</BLOCKQUOTE>
+		<DIV ALIGN="RIGHT">$Id: os.html,v 1.2 2000/06/14 14:59:30 toyoshim Exp $</DIV>
+	</BODY>
+</HTML>

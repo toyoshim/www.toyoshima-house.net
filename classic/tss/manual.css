@@ -1,0 +1,99 @@
+BODY {
+  background-color: black;
+  color: white;
+  text-color: white;
+  margin-left: 5%;
+  margin-right: 5%;
+}
+A:link { color: #00ccff; }
+A:visited { color: #0088cc; }
+A:active { color: #ff0000; }
+H1 {
+  color: #ffff66;
+  margin: 0.1em 0.2em 0.3em 0.2em;
+  border-width: 0.1em 0.15em 0.1em 0.3em;
+  border-style: solid;
+  border-color: #ffcc00;
+  font-size: 3em;
+  font-weight: 400;
+}
+H2 {
+  color: #ff0044;
+  margin: 0.5em 2em 0.5em 1em;
+  border-width: 0 0 0 0.2em;
+  border-style: solid;
+  border-color: #c04040;
+  font-size: 2em;
+  font-weight: 400;
+}
+H3 {
+  color: #ffbbff;
+  margin: 0.2em 50% 1em 2em;
+  border-width: 0 0 0.1em 0.3em;
+  border-style: solid;
+  border-color: #ffddff;
+  font-size: 1.5em;
+  font-weight: 400;
+}
+H4 {
+  margin: 0.5em 3em 0.5em 3em;
+}
+
+TH {
+  background-color: #4040c0;
+  width: 15%;
+}
+
+TH.ID {
+  background-color: #c04040;
+}
+TH.SOURCE {
+  background-color: #40c040;
+}
+TH.TONE {
+  background-color: #4040c0;
+}
+TH.FM {
+  background-color: #c040c0;
+}
+
+TD {
+  background-color: #808040;
+}
+
+TD.MODE {
+  background-color: #802020;
+}
+
+TD.RANGE {
+  background-color: #408080;
+  width: 20%;
+}
+
+TD.ID {
+  background-color: #802020;
+  text-align: center;
+}
+TD.SOURCE {
+  background-color: #208020;
+  text-align: center;
+}
+TD.TONE {
+  background-color: #202080;
+  text-align: center;
+}
+TD.FM {
+  background-color: #802080;
+  text-align: center;
+}
+
+TD.NUMBER {
+  background-color: #208020;
+  text-align: center;
+  width: 15pt;
+}
+
+P {
+  color: white;
+  margin: 0 0 0 4em;
+}

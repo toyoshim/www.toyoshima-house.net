@@ -1,0 +1,60 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888">
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■LZHをExpanderから扱えるようにする方法 ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">LZHをExpanderから扱えるようにする方法</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			BeOSには標準でExpanderというソフトが付属していて、Zipやらtar、gzなんかを解凍できます。
+			せっかくですから、他の圧縮ファイルもこいつを使って解凍できないでしょうか・・・。
+			えぇ、できます。できますとも！　ウラー！！
+			<br>&nbsp;<br><font size="+1">◆Expanderの定義ファイル</font>
+			<p>&nbsp;
+			/boot/home/config/etc/expander.rules.sampleというファイルがあります。
+			そうです、名前からもわかる通り、これがExpanderの定義ファイルのサンプルとなっています。
+			こいつを/boot/home/config/etc/expander.rulesという名前にコピーしてやれば定義ファイル
+			として機能します。サンプルを見ればわかるとは思うのですが、
+			この定義ファイルのフォーマットについてちょっと書いてみます。
+			<p>&nbsp;
+			このファイルは１行に１エントリとなっていて、各行はタブで区切られた４項目からなります。
+			項目は、「MIMEタイプ」「拡張子」「一覧取得のためのコマンド」「展開のためのコマンド」の４つです。
+			「MIMEタイプ」は、そのエントリがどのMIMEタイプに属するファイルに対するものなのかを示します。
+			「拡張子」はその名の通り。ドットから記述します。「一覧取得のためのコマンド」は、
+			使用されているのか謎ですが、ファイル名一覧を取るためのコマンドを記述します。
+			「展開のためのコマンド」も同様です。これらの記述にはファイル名のかわりに「%s」を記述します。
+			<p>&nbsp;
+			以下にLZHファイルのための記述を掲載しますので参考にしてください。
+			<p>&nbsp;[/boot/home/config/etc/expander.rules]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000"># lha rule:
+"application/x-lharc"	.lzh	"lha l %s"	"lha x %s"</font></pre></td></tr></table></div>
+			<p>&nbsp;
+			これでExpanderからLZHを展開できます（もちろん、lhaをインストールする必要はありますが）。
+			<br>&nbsp;<br><font size="+1">◆ダブルクリックで・・・</font>
+			<p>&nbsp;
+			このままではTrackerからLZHファイルを開こうとしてもExpanderが起動しません。
+			ってことでファイルタイプの設定をしてみましょう。BeOSには一応ファイルタイプとして
+			"application/x-lharc"というタイプが登録されているようです。
+			なので、あとはこのタイプがExpanderの扱えるタイプだと明示すればOK。
+			/boot/beos/apps/をTrackerで開き、Expanderのところで右クリック。
+			メニューからadd-ons/FileTypeを選びます。
+			「Supported Types:」のところで「Add…」を選び、"application/x-lharc"を追加します。
+			あとはこいつを保存し、FileTypeから"application/x-lharc"のPreffered Applicationが
+			Expanderになっていることを確認します。ここまで完了すれば、LZHファイルのダブルクリックで
+			Expnaderが起動。その後いつも通りの操作でZIPファイル同様LZHファイルも展開できるはずです。
+		</blockquote>
+		<div align="center"><a href="./index.html">すげーぜ！</a></div>
+		<hr width="80%">
+		<div align="center"><a href="../main.html"><img src="../banner/psbanner.jpg" width="200" height="40" border="0"></a></div>
+		&nbsp;<br>
+		<div align="right">CVS 最終更新 ---- $Id: tips_expander.html,v 1.2 2000/07/02 15:12:00 toyoshim Exp $</div>
+	</body>
+</html>

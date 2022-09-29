@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="Takashi TOYOSHIMA">
+  <link rel="stylesheet" href="/common.css">
+  <title>TOYOSHIMA HOUSE - Go with Ruputer!! : Development on BeOS/NetBSD</title>
+  <script language="JavaScript" src="/menu.js"></script>
+ </head>
+ <body>
+  <h1>Go with Ruputer!! : Development on BeOS/NetBSD</h1>
+  <p>Here,
+    I will introduce how to make gcc environment for Ruputer on BeOS R5 or NetBSD 1.5.
+    Probably you can do on other UNIX like platforms.
+  <h2>binutils (assembler, linker, and so on)</h2>
+  <h3>on BeOS</h3>
+  <p>It's good idea to install binutils-2.10.1 and gcc-2.95.3 for BeOS previously.
+  These packages include patch files needed for compiling these on BeOS, too.
+  You can get these packages <a href="http://winbe.twintail.org/">here</a>.
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/binutils-2.10.1.tar.gz
+ % cd binutils-2.10.1
+ % patch -p1 < $SOMEWHERE/binutils-2.10.1-beos.diff
+ % mkdir build
+ % cd build
+ % ../configure --host=i586-pc-beos \
+ --target=mn10200-elf \
+ --prefix=/boot/develop/tools/gnupro
+ % make
+ % make install</pre>
+  <h3>on NetBSD</h3>
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/binutils-2.11.2.tar.gz
+ % cd binutils-2.11.2
+ % mkdir build
+ % cd build
+ % ../configure --prefix=/usr/local/gcc-2.95.2 \
+ --target=mn10200-elf
+ % gmake
+ % sudo gmake install</pre>
+  <h2>gcc (C Compiler)</h2>
+  <p>If you use not gcc-core but gcc tar-ball,
+    you may have to add '--enable-languages=c' to configure options.
+  <h3>on BeOS</h3>
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/gcc-core-2.95.3.tar.gz
+ % cd gcc-2.95.3
+ % patch -p1 < $SOMEWHERE/gcc-2.95.3-beos.diff
+ % mkdir build
+ % cd build
+ % ../configure --prefix=/boot/develop/tools/gnupro \
+ --target=mn10200-elf --with-newlib
+ % make
+ % make install</pre>
+  <h3>on NetBSD</h3>
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/gcc-core-2.95.2.tar.gz
+ % cd gcc-2.95.2
+ % mkdir build
+ % cd build
+ % ../configure --prefix=/usr/local/gcc-2.95.2 \
+ --target=mn10200-elf --with-newlib
+ % gmake
+ % sudo gmake install</pre>
+  <h2>newlib (a simple ANSI C library)</h2>
+  <p>This library is not indispensable,
+    but useful for your development.
+  <pre class="command">
+ % tar zxvf newlib-1.9.0.tar.gz
+ % cd newlib-1.9.0
+ % mkdir build
+ % cd build
+ % ../configure --host=$MACHTYPE \
+ --target=mn10200-elf --prefix=$PREFIX
+ % gmake CC_FOR_TARGET=mn10200-elf-gcc -I../../include \
+   AR_FOR_TARGET=mn10200-elf-ar \
+   LD_FOR_TARGET=mn10200-elf-ld \
+   AS_FOR_TARGET=mn10200-elf-as \
+   RANLIB_FOR_TARGET=mn10200-elf-ranlib
+ % sudo gmake install</pre>
+  <h2>RupSDK</h2>
+  <p>RupSDK is distributed by SII.
+    So you can get it from Ruputer's official site.
+  <pre class="command">
+ $ cd $PREFIX/mn10200-elf
+ $ unzip $SOMEWHERE/RupSDK102D.zip
+ $ for f in RupSDK/inc/*; do \
+ nkf -dSe < $f > include/`basename $f`; done
+ $ mv include/ADDRESS.DEF include/address.def
+ $ cp RupSDK/lib/* lib/</pre>
+  <h2>crt0.o</h2>
+  <p>Create crt0.o from <a href="crt0.s">crt0.s</a>.
+  <pre class="command">
+ % mn10200-elf-as -I$PREFIX/mn10200-elf/include \
+ crt0.c -o crt0.o
+ % sudo mv crt0.o $PREFIX/mn10200-elf/lib/</pre>
+  <h2>rutools</h2>
+  <p>rutools is developed by <a href="http://www.nisoc.or.jp/~imai/">IMAI Hiroei</a>.
+    It include file transfer library between PC and Ruputer,
+    some transfer utility programs,
+    and converter program which can make executables for Ruputer.
+    GNU readline library is required for rutools.
+    So first of all, you should install it.
+    And rutools don't support new record types of srec.
+    If you use binutils-2.10.x or later, you shuold fix this problem.
+    <a href="rutools-0.7.3.diff">Here</a> is a patch for it.
+  <h3>on BeOS</h3>
+  <p>On BeOS, you can not use transfer libraries as is.
+     I have not resolved this problem,
+     so only sf2bin, a converter program, is available.
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/rutools-0.7.3.tar.gz
+ % cd rutools-0.7.3
+ % patch -p1 < $SOMEWHERE/rutools-0.7.3.diff
+ % cd ruutils
+ % make
+ % cp sf2bin $HOME/config/bin/sf2bin</pre>
+  <h3>on NetBSD</h3>
+  <p>You have to edit make-args by hand.
+     On CFLAGS line, add path to the readline library headers.
+     It may be like '-I/usr/local/include'.
+     And you should specify install prefix, too.
+  <pre class="command">
+ % tar zxvf $SOMEWHERE/rutools-0.7.3.tar.gz
+ % cd rutools-0.7.3
+ % patch -p1 < $SOMEWHERE/rutools-0.7.3.diff
+ % env LIBRARY_PATH=/usr/local/lib make
+ % sudo make install</pre>
+  <h2>How to make executables for Ruputer</h2>
+  <p>Typical process is following.
+  <pre class="command">
+ % mn10200-elf-gcc -o hello.o -c hello.c
+ % mn10200-elf-gcc hello.o -o hello \
+ --Xlinker -Ttext=0x110100 \
+ -lrupsys -lruptool -llcdbios -lpsdos -lwbios
+ % cp hello hello.elf
+ % mn10200-elf-objcopy -O srec hello hello.elf
+ % sf2bin hello.elf hello.exf</pre>
+  <hr class="footer">
+  <div class="id">$Id: dev.html,v 1.3 2001/09/18 01:42:50 toyoshim Exp $</div>
+ </body>
+</html>

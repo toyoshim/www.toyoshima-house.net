@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="Shift_JIS"?>
+
+<!--elpoint xmlns="x-schema:http://komaba.utmc.or.jp/elpoint/elpointSchema.xml"-->
+<elpoint xmlns="x-schema:elpointSchema.xml">
+
+<!--
+コメントはこの形式で
+-->
+
+<system>									<!-- ヘッダ開始。システム情報を記述します。 -->
+<title>L.H.A.</title>								<!-- ゲームタイトル。 -->
+<screen width="640" height="480"/>						<!-- 画面サイズ。今のところ他の値は不可 -->
+<start id="1"/>									<!-- 最初に読むシナリオ。idかnameで指定 -->
+<font size="16" name="ＭＳ ゴシック"/>						<!-- 標準フォント指定 -->
+<base path="./lha/"/>								<!-- リンクしてるファイルのベースディレクトリ -->
+</system>									<!-- ヘッダ終了。ヘッダはこれから拡張してきます -->
+
+<script id="1" name="start">							<!-- シーン1。id、nameはそれぞれ省略可。 -->
+<music type="audio/x-cdda" src="1" reload="false" loop="true"/>				<!-- 音楽再生 -->
+<sound type="audio/wav" src="./wave/se01.wav" reload="true" loop="true"/>	<!-- 効果音再生 -->
+<text hide="false"/>								<!-- テキストウィンドウを表示 -->
+<message>									<!-- テキストウィンドウに文字を表示 -->
+物語のはじまり、はじまり～。
+</message>
+<text hide="true"/>								<!-- テキストウィンドウを閉じる -->
+</script>									<!-- シーン1終了 -->
+
+<!-- (*)シーンの終わりに達した場合には、次のidのシーンへ移る。
+idが省略されている場合、直前のidから類推されるidが順次内部的に
+割り当てられる -->
+
+<script id="2">
+<music type="CDDA" src="1" reload="false" loop="true"/>				<!-- 音楽が鳴ってなかったら再生 -->
+<sound/>									<!-- 効果音停止 -->
+<flag id="1" state="true"/>							<!-- フラグ1を立てる -->
+<flag id="2" state="false"/>							<!-- フラグ2を下げる -->
+<text hide="false"/>								<!-- テキストウィンドウを表示 -->
+<select>									<!-- 選択肢 -->
+	<item name="first">笑う</item>						<!-- これを選んだらfirstというnameのシーンへ -->
+	<item>踊る</item>							<!-- これを選んだら次のシーンへ (*)のルールが適用 -->
+	<item id="4">叩く</item>						<!-- これを選んだらidが4のシーンへ -->
+</select>
+</script>
+
+<script id="3" name="first">
+<text hide="false"/>
+<graphic id="1" type="image/bmp" src="./bmp/cg000.bmp"/>
+<sound type="audio/wav" src="./wave/se02.wav" reload="true" loop="false"/>
+<message>ガシャーン！！</message>
+<layer id="2" type="image/bmp" src="./bmp/ruri000.bmp" transcolor="#ff00ff"/>	<!-- いわゆる合成 -->
+<message>【ルリ】・・・なに・・・？</message>
+<message>【？？】ヒヒヒヒヒヒ・・・・</message>
+<screeneffect type="fadeout" color="#000000"/>					<!-- 黒へフェードアウト -->
+</script>
+
+<script>									<!-- 省略されたidは4 -->
+<screeneffect type="fadein" color="#000000"/>							<!-- 黒からフェードイン -->
+<if id="1">									<!-- フラグ1が立っている場合のみ中を実行 -->
+	<flag name="event flag" state="true"/>					<!-- フラグもidとnameいずれかで管理できる -->
+	<goto id="4"/>								<!-- シーン4へ移動 -->
+</if>
+<music type="audio/midi" src="./midi/bgm.mid" loop="true"/>
+</script>
+
+</elpoint>

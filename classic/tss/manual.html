@@ -1,0 +1,554 @@
+<HTML>
+	<HEAD>
+		<TITLE>T'SoundSystem Manual</TITLE>
+		<LINK REV="MADE" HREF="mailto:toyoshim@toyoshima-house.net">
+			<LINK REL="stylesheet" HREF="manual.css">
+				<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=Shift_JIS">
+				<META HTTP-EQUIV="CONTENT-STYLE-TYPE" CONTENT="text/css">
+	</HEAD>
+	<BODY TEXT="white" BGCOLOR="black">
+		<DIV ALIGN="center"><IMG SRC="logo.png"></DIV>
+		<HR>
+		<H1>T'SoundSystem Spec</H1>
+		<H2>Waht's New</H2>
+		<P>・音源モジュールとしてOSCを追加</P>
+		<P>・ntコマンドを追加</P>
+		<P>・音量解像度のモードを追加</P>
+		<P>・#FINENESSを追加</P>
+		<P>・モジュールIDの古い指定方法について記述を削除した（実装としては残っている）</P>
+		<H2>基本機能</H2>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						同時発音数</TH><TD>制限なし（コンパイラの仕様上の制限で26）。</TD>
+				</TR>
+				<TR>
+					<TH>
+						音色表現力</TH><TD>チェンネル毎に任意のモジュールを動的に選択可能。加えて、チャンネル間のFM変調機能搭載。ステレオ出力。</TD>
+				</TR>
+				<TR>
+					<TH>
+						音程解像度</TH><TD>3種類から選択可能。</TD>
+				</TR>
+				<TR>
+					<TH>
+						音量解像度</TH><TD>2種類から選択可能。</TD>
+				</TR>
+				<TR>
+					<TH>
+						タイマー</TH><TD>テンポ制御用とエンベロープ制御用の２本の擬似タイマー割り込みを内部に持つ。</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>モジュール</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TD CLASS="NUMBER">0</TD>
+					<TH>
+						PSG</TH><TD>矩形波音源。もっとも単純な音色しか出せないが、処理はもっとも軽い。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">1</TD>
+					<TH>
+						FC</TH><TD>デューティ比を調節できる矩形波。ファミコンレベルの音色表現が可能。処理も軽い。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">2</TD>
+					<TH>
+						NOISE</TH><TD>ノイズ音源。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">3</TD>
+					<TH>
+						SIN</TH><TD>サイン波。FM変調をすることで、FM音源同様の表現が可能。若干重い。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">4</TD>
+					<TH>
+						SCC</TH><TD>ウェーブテーブル音源。コナミ往年のSCC音源を再現可能。テーブルサイズは32。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">5</TD>
+					<TH>
+						OSC</TH><TD>固定波形テーブル音源。三角波や鋸波など、基本的な波形を再現。</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音程解像度</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TD CLASS="NUMBER">0</TD>
+					<TH>
+						Hz</TH><TD>Hz単位での表現が可能。デフォルトのモード。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">1</TD>
+					<TH>
+						MSX</TH><TD>MSXで使用されていたPSGと同等の解像度。高音域になると、音程が荒くなる。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">2</TD>
+					<TH>
+						FM</TH><TD>FM音源等で使用されているような指数的な解像度。半音を64等分できる解像度を持つ。</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音量解像度</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TD CLASS="NUMBER">0</TD>
+					<TH>
+						線形</TH><TD>線形的な音量変化。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">1</TD>
+					<TH>
+						非線型</TH><TD>FM音源などで採用されている音楽的な音量変化。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">16</TD>
+					<TH>
+						線形2</TH><TD>線形的な音量変化。ただし15段階指定の際に、全体を15分割せずに、上半分を15分割する。</TD>
+				</TR>
+				<TR>
+					<TD CLASS="NUMBER">17</TD>
+					<TH>
+						非線型2</TH><TD>FM音源などで採用されている音楽的な音量変化。ただし15段階指定の際に、全体を15分割せずに、上半分を15分割する。</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<HR>
+		<H1>T'SoundSystem MML Manual</H1>
+		<H2>制御文</H2>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						#TITLE &lt;[title]&gt;</TH><TD>曲名を登録する。'\'を使えば、'&gt;'等も含めることができる。<BR>
+						GAMEBOYモードでは意味を持たない。<BR>
+						(例)#TITLE &lt;RISING ZAN \&lt;THE SAMURAI GUNMAN\&gt;&gt;</TD>
+				</TR>
+				<TR>
+					<TH>
+						#CHANNEL [n]</TH><TD>曲のなかで使う最大音色数を指定する。<BR>
+						(例)#CHANNEL 3</TD>
+				</TR>
+				<TR>
+					<TH>
+						#PRAGMA [key]</TH><TD>特定ハードウェア向けの曲データを作る際に使用。keyとしてGAMEBOY、FAMICOMが存在している。詳細は非公開。<BR>
+						(例)#PRAGMA GAMEBOY</TD>
+				</TR>
+				<TR>
+					<TH>
+						#WAV [n], &lt;[table]&gt;</TH><TD>SCC用の波形テーブル n にデータを設定する。signed 
+						char×32。パラメータの詳細は後述。<BR>
+						GAMEBOYモードの時は０～15しかパラメータに含めることが出来ない。 (例)#WAV 0, &lt;(0, 127),16, (-128, 
+						127),16&gt; 0～255の256個登録できる。</TD>
+				</TR>
+				<TR>
+					<TH>
+						#TABLE [n], &lt;[table]&gt;</TH><TD>エンベロープ用の波形テーブル n にデータを設定する。signed char 
+						の任意長。パラメータの詳細は上に同じ。0～255の256個登録できる。</TD>
+				</TR>
+				<TR>
+					<TH>
+						#OCTAVE [key]</TH><TD>keyはNORMALとREVERSEが指定可能。REVERSEを指定した場合は、相対オクターブ命令「&gt;」「&lt;」の機能が入れ替わる。<BR>
+						(例)#OCTAVE REVERSE</TD>
+				</TR>
+				<TR>
+					<TH>
+						#VOLUME [key]</TH><TD>keyはNORMALとREVERSEが指定可能。REVERSEを指定した場合は、相対音量命令「)」「(」の機能が入れ替わる。<BR>
+					</TD>
+				</TR>
+				<TR>
+					<TH>
+						#FINENESS [n]</TH><TD>サスティンやLFOなどの処理に使うタイマーの精度を指定する。デフォルト値は368で0～65535までの値をとり、小さいほど細かく処理される。あまり細かく指定すると極端に処理が重くなるので、せいぜい64程度までの値にすべきである。</TD>
+				</TR>
+				<TR>
+					<TH>
+						#A～#Z</TH><TD>各チャンネルのMMLデータを記述する。</TD>
+				</TR>
+				<TR>
+					<TH>
+						#END</TH><TD>MMLの終了を示す。これ以降はコメントとして扱われる。</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>テーブルパラメータ</H3>
+		<P>要素の数だけ、「,」で区切ってパラメータを列挙する。</P>
+		<P>(l, m),n の書式で、lからmまでの値をn個のパラメータで線形補完する。例えば、(1,5),5 は、1,2,3,4,5 と同じ。</P>
+		<H2>MMLコマンド</H2>
+		<H3>制御関連</H3>
+		<P>(*)対応モード : N = 通常モード、 G = ゲームボーイモード
+		</P>
+		<BLOCKQUOTE>
+			<TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						<I>コマンド</I></TH><TD CLASS="RANGE"><B><I><CENTER>有効範囲</CENTER>
+							</I></B>
+					</TD>
+					<TD><B><I><CENTER>解説</CENTER>
+							</I></B>
+					</TD>
+					<TD CLASS="MODE"><B><I><CENTER>(*)</CENTER>
+							</I></B>
+					</TD>
+				</TR>
+				<TR>
+					<TH>
+						t[n]</TH><TD CLASS="RANGE">1≦n(120)≦512</TD>
+					<TD>テンポ指定。テンポ制御用のタイマーの値を操作するので全チャンネルに影響が及ぶ。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						$</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>無限ループ開始位置指定。これが指定されると、チャンネルデータが最後まで演奏された時、この位置に戻る。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						[[n] ... | ]</TH><TD CLASS="RANGE">2≦n(2)≦255</TD>
+					<TD>ループ擬似命令。'['から']'の間をn回繰り返す。最終ループの時は、'|'まで来たらループを抜ける。'|'は省略可能。コンパイルの段階で展開される。そのため、バイナリサイズは大きくなってしまう。が、相対命令も有効。ネストは不可。<BR>
+						(例)[3c&lt;] …(展開)→ c&lt; c&lt; c&lt;</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						/:[n] ... / ... :/</TH><TD CLASS="RANGE">2≦n(2)≦255</TD>
+					<TD>ループ命令。'/:'から':/'の間をn回繰り返す。最終ループの時は、'/'まで来たらループを抜ける。'/'は省略可能。ドライバレベルのループ機能なので、コンパイル時に展開される相対命令の類は繰り返されない。ネストは16重まで可能。<BR>
+						(例)/:2cde/fgab&lt;:/c:/ …(展開)→ cdefgab cde &lt;c</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						{ ... }</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>コメント。'{'から'}'で囲まれた部分をコメントとして扱う。ネストも可能。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音色関連</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						s[n]</TH><TD CLASS="RANGE">0≦n(0)≦255</TD>
+					<TD>サスティン。キーオフ後にいきなり音を消さずに減衰させる。0の時はOFF。値が大きいほど減衰も急。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						s[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦255,<BR>
+						-128≦m(0)≦127</TD>
+					<TD>拡張サスティン。キーオフ後に、音量だけではなく、音程も同時に連続的に変化させる。mに対する音程の変化分は、音程モードにより、異なる。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						%</TH><TD CLASS="RANGE">0≦n(0)≦255</TD>
+					<TD>モジュール変更。モジュール指定に使う数値は後述。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						@</TH><TD CLASS="RANGE">0≦n(0)≦255</TD>
+					<TD>音色変更。変更の方法・有効範囲はモジュール毎に異なり、そのパラメータの有効性はコンパイル時にはチェックされないので注意。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音程関連</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						o[n]</TH><TD CLASS="RANGE">1≦n(4)≦8</TD>
+					<TD>オクターブの指定。大きいほど高い。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						&gt;</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>オクターブ・相対ダウン。コンパイラ擬似命令。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						&lt;</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>オクターブ・相対アップ。コンパイラ擬似命令。<BR>
+						(例)cdrfgab&lt;c</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						a[n]～g[n]</TH><TD CLASS="RANGE">1≦n(L)≦1024</TD>
+					<TD>ラ～ソにそれぞれ対応した音を出す。Lはl[n]で指定された値。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						+(#)/-</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>a～gの直後に記述することで、音程を半音単位で上げ/下げする。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						r[n]</TH><TD CLASS="RANGE">1≦n(L)≦1024</TD>
+					<TD>休符指定。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						k[n]</TH><TD CLASS="RANGE">-128≦n(0)≦127</TD>
+					<TD>ディチューン。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						mp[a], [b], [c], [d], [e]</TH><TD CLASS="RANGE">0≦a≦65535,<BR>
+						0≦b≦255,<BR>
+						0≦c≦255,<BR>
+						-128≦d≦127,<BR>
+						0≦e≦255</TD>
+					<TD>ピッチモジュレーション。a : Delay, b : Depth, c : Width, d : Height, e : Delta。発声後、a 
+						単位時間後にモジュレーション開始。width 単位時間おきに height 単位音程ずつ変化する。変化量の絶対値が depth 
+						に達したら、変化の方向を逆転する。以上の処理を、delta 回繰りかえしたら、depth は 1 増える。任意のパラメータを省略可能。これを使用すると s 
+						コマンドの第 2 パラメータは無効になる。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						nt[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦255,<BR>
+						0≦m(0)≦255<BR>
+					</TD>
+					<TD>ノートエンベロープ。テーブルn番のデータでノートエンベロープ（キーオン・キーオフのない高速アルペジエータ）をかける。mは1回の変化が起こるまでの時間。mが大きいほど変化はゆっくりになる。いずれかの省略は不可。共に省略、またはmが0の時は機能をOFFにする。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						p[n]</TH><TD CLASS="RANGE">0≦n(0)≦3</TD>
+					<TD>パンポットの指定。v[n]系のモノラル指定を使って音量指定した時だけ意味がある。0:mute, 1:left, 2:right, 3:center。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音長関連</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						q[n]</TH><TD CLASS="RANGE">0≦n(MG)≦MG</TD>
+					<TD>実際に演奏する音調の割合。ある長さだけ音を伸ばそうとしたとき、実際にはその長さのn/MGが演奏され、残りの時間は休符になる。（現在はMG=16で固定）</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						l[n]</TH><TD CLASS="RANGE">1≦n(4)≦1024</TD>
+					<TD>省略時の音調指定</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						.</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>音長指定の直後に付加することで、長さを1.5倍にする。続けて複数付加できる。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						^</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>タイ。音長のあとにさらに音長を追加する。<BR>
+						(例)c4^16</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>音量関連</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						v[n]</TH><TD CLASS="RANGE">0≦n(10)≦15</TD>
+					<TD>音量を指定する。数値が大きいほど音も大きい。この方法で指定すると、パンポットで指定の位置に音がふられる。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						v[n], [n]</TH><TD CLASS="RANGE">0≦n≦15</TD>
+					<TD>音量を指定する。始めの値が左、次の値が右のチャンネルの音量を示す。任意のパラメータを省略可能。<BR>
+						(例)v15,0 c v10, c v0,10 c v,15 c</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						@v[n]</TH><TD CLASS="RANGE">0≦n(10)≦255</TD>
+					<TD>音量を細かく指定する。モノラル。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						@v[n],[n]</TH><TD CLASS="RANGE">0≦n(10)≦255</TD>
+					<TD>音量を細かく指定する。ステレオ。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						)</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>音量・相対ダウン。コンパイラ擬似命令。直前にvを使ったか、@vを使ったかで変化単位が変わる。<BR>
+						(例)v0 /:c)d)e:/ …(展開)→ v0c v1d v2e c v1d v2e</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						(</TH><TD CLASS="RANGE">&nbsp;</TD>
+					<TD>音量・相対アップ。コンパイラ擬似命令。直前にvを使ったか、@vを使ったかで変化単位が変わる。</TD>
+					<TD CLASS="MODE">N/G</TD>
+				</TR>
+				<TR>
+					<TH>
+						_[n]</TH><TD CLASS="RANGE">0≦n(1?)≦255</TD>
+					<TD>音量を相対的に、256段階指定単位でnだけダウンする。nの値は最初に省略された時は1、それ以外で省略された時は前回の値が使用される。ドライバプリミティブ命令。<BR>
+						(例)@v32 l16 c_8d_e_f_g …(展開)→ @v32 c16 @v24 d16 @v16 e16 @v8 f16 @v0 g16</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						~[n]</TH><TD CLASS="RANGE">0≦n(1?)≦255</TD>
+					<TD>音量を相対的に、256段階指定単位でnだけアップする。nの値は最初に省略された時は1、それ以外で省略された時は前回の値が使用される。前回の値は「_」と「~」ではそれぞれ別々に管理される。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						na[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦255,<BR>
+						0≦m(0)≦255<BR>
+					</TD>
+					<TD>音量エンベロープ（高速アルペジエータ）。テーブルn番のデータでエンベロープをかける。mは1回の変化が起こるまでの時間。mが大きいほど変化はゆっくりになる。いずれかの省略は不可。共に省略、またはmが0の時は機能をOFFにする。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						x[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦1,<BR>
+						0≦m(0)≦3</TD>
+					<TD>音量モード(n)、音程モード(m)の設定。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H3>FM変調関連</H3>
+		<BLOCKQUOTE><TABLE WIDTH="80%">
+				<TR>
+					<TH>
+						@i[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦8,<BR>
+						0≦m(0)≦3</TD>
+					<TD>FM変調入力モードを設定する。nが0の時OFF。1～8は変調の感度を表す。mは変調に使用するパイプ番号。</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+				<TR>
+					<TH>
+						@o[n],[m]</TH><TD CLASS="RANGE">0≦n(0)≦2,<BR>
+						0≦m(0)≦3</TD>
+					<TD>FM変調出力モードを設定する。nが0の時OFF。1の時は上書モード、2の時は加算モード。mは変調に使用するパイプ番号</TD>
+					<TD CLASS="MODE">N</TD>
+				</TR>
+			</TABLE>
+		</BLOCKQUOTE>
+		<H2>モジュール</H2>
+		<P>モジュール指定に使うIDは以下の通り。</P>
+		<BLOCKQUOTE><BLOCKQUOTE><TABLE WIDTH="60%" ID="Table1">
+					<TR>
+						<TH CLASS="ID">
+							ID</TH>
+						<TH CLASS="SOURCE">
+							音源</TH>
+						<TH CLASS="FM">
+							変調(IN/OUT)</TH>
+					</TR>
+					<TR>
+						<TD CLASS="ID">0</TD>
+						<TD CLASS="SOURCE">PSG</TD>
+						<TD CLASS="FM">×/×</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">1</TD>
+						<TD CLASS="SOURCE">FC</TD>
+						<TD CLASS="FM">×/×</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">2</TD>
+						<TD CLASS="SOURCE">NOISE</TD>
+						<TD CLASS="FM">×/×</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">3</TD>
+						<TD CLASS="SOURCE">SIN</TD>
+						<TD CLASS="FM">○/○</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">4</TD>
+						<TD CLASS="SOURCE">SCC</TD>
+						<TD CLASS="FM">○/○</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">5</TD>
+						<TD CLASS="SOURCE">OSC</TD>
+						<TD CLASS="FM">○/○</TD>
+					</TR>
+				</TABLE>
+			</BLOCKQUOTE></BLOCKQUOTE>
+		<H2>OSC波形</H2>
+		<P>OSCモジュール時の音色番号では以下の波形が指定できる。</P>
+		<BLOCKQUOTE><BLOCKQUOTE><TABLE WIDTH="60%" ID="Table2">
+					<TR>
+						<TH CLASS="ID">
+							ID</TH>
+						<TH CLASS="SOURCE">
+							波形</TH>
+					</TR>
+					<TR>
+						<TD CLASS="ID">0</TD>
+						<TD CLASS="SOURCE">正弦波</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">1</TD>
+						<TD CLASS="SOURCE">鋸波（／）</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">2</TD>
+						<TD CLASS="SOURCE">鋸波（＼）</TD>
+					</TR>
+					<TR>
+						<TD CLASS="ID">3</TD>
+						<TD CLASS="SOURCE">三角波</TD>
+					</TR>
+				</TABLE>
+			</BLOCKQUOTE></BLOCKQUOTE>
+		<H2>FM変調</H2>
+		<H3>変調出力モード</H3>
+		<P>出力モードがONになると、そのチャンネルの波形データは、スピーカへは出力されず、パイプへ出力されます。パイプに出力されたデータはそれ以降のチャンネルに影響を与えることができます。</P>
+		<P>まず上書モードですが、このモードではすでにパイプにデータがあった場合でも、現在の出力でデータを上書きします。</P>
+		<P>加算モードでは、逆にパイプにあるデータと、現在の出力の合成波をパイプに出力します。</P>
+		<P>パイプのデータは自動に初期化されることはないので、パイプへ最初に出力するチャンネルは上書モードである必要があります。</P>
+		<H3>変調入力モード</H3>
+		<P>入力モードがONになると、パイプからの入力データを位相に反映させます。この時の反映の度合いは感度によります。</P>
+		<P>あるチャンネルからの出力を入力に利用する際、出力側のチャンネル番号を入力側のチャンネル番号よりも若いものにして、双方で同じ番号のパイプに出力/入力する必要があります。</P>
+		<H3>例</H3>
+		<BLOCKQUOTE>
+			<PRE><B>
+Ａ→Ｂ→Ｃ♪
+</B></PRE>
+			<BLOCKQUOTE><PRE>
+#A @i0,0 @o1,0 { 最初のチャンネル。パイプ0に新規に出力 }
+#B @i1,0 @o1,0 { #Aの出力をパイプ0経由で位相に反映させたものを再度パイプ0に出力 }
+#C @i1,0 @o0,0 { #A-&gt;#Bをパイプ0経由で位相に反映させスピーカーへ出力 }
+</PRE>
+			</BLOCKQUOTE>
+			<PRE><B>
+Ａ―＋→Ｃ♪
+Ｂ―＋
+</B></PRE>
+			<BLOCKQUOTE><PRE>
+#A @i0,0 @o1,0 {パイプ0に新規出力 }
+#B @i0,0 @o2,0 {パイプ0に加算出力 }
+#C @i1,0 @o0,0 {#A+#Bをパイプ0経由で位相に反映させスピーカーへ出力 }
+</PRE>
+			</BLOCKQUOTE></BLOCKQUOTE>
+		<HR>
+		<P STYLE="TEXT-ALIGN:right">based on ver.0.92</P>
+	</BODY>
+</HTML>

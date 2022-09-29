@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="Shift_JIS" ?>
+<?xml:stylesheet type="text/xsl" href="version1.xsl" ?>
+<!DOCTYPE lpoint SYSTEM "version1.dtd">
+<!--
+上の２行は、ファイルでの配付時用の設定。
+公式ページにて公開されているxsl/dtdファイルのコピーを共に配給する必要があり、
+また、これらのファイルの再配布は作者により認められている。
+-->
+<!-- ウェブ上で公開する時は、下のコメントパートの定義の方を使うようにすることが望ましい。 -->
+<!--
+<?xml:stylesheet type="text/xsl" href="http://www.tk.xaxon.ne.jp/~toyoshim/lpoint/version1.xsl" ?>
+<!DOCTYPE lpoint PUBLIC "-//UTMC//LPoint An XML based System for Novel Games//EN"
+                          "http://www.tk.xaxon.ne.jp/~toyoshim/lpoint/version1.dtd" >
+-->
+
+<!-- ここまでがヘッダ -->
+
+<!--
+HTMLと違い、タグの省略は絶対に認めない。
+タグの入れ子構造は可能だが、<a><b></a></b>のような入れ違いのタグは認めない。
+親子関係の制限も厳密に定められている。
+<a></a>は、<a/>と同義。
+<img>のようなタグでも</img>は省略できない。<img/>を使うべき。
+&によるエンティティでは、&lt;&gt;&amp;&apos;&quot;のみが暗黙に使える。
+&#10進コード、&#x16進コードで、キャラクタコード指定ができる。
+大文字小文字は区別される。
+コメント中には、「-」の２バイトの連続（全角で書くと「－－」）があってはならない。
+-->
+
+<lpoint>
+
+<head>
+	<title>サンプル</title>
+	<screen width="640" height="480" />
+	<text scroll="leaf" />
+</head>
+
+<body>
+
+<!-- ########################################################################################################################### -->
+<!-- TITLE -->
+<!-- ########################################################################################################################### -->
+<scene name="title">
+
+<script>
+<music media="CDDA" src="CDDA://Track01.cda" reload="true" loop="false" />			<!-- CD１曲目を再生 -->
+<!-- CDDAを指定するために、独自のスキーム(CDDA://)を定義している。 -->
+<!--
+reloadがfalseの時は、現在再生中の物と、これから再生するものが同一の場合は、何もしない。
+trueの時は、再度頭から再生する。
+-->
+
+<background color="#ffffff" method="null" />							<!-- 画面を白に。効果なし -->
+<background src="logo.bmp" method="fade" speed="10" />						<!-- logo.bmpを表示 効果FADE -->
+<!--
+methodではadd-onの名前を指定して、特殊効果を得る。speed等のパラメータは各add-onに渡され、
+処理されるため、add-on毎にパラメータの種類は異なる。
+-->
+<wait count="3000" />										<!-- 3秒待つ -->
+<background color="#000000" method="fade" />							<!-- 画面暗転。効果FADE -->
+
+<background src="title.bmp" method="fade" />							<!-- タイトル表示。効果FADE -->
+<img src="title-s.bmp" width="300" height="100" x="160" y="50" method="fade" layer="string"/>	<!-- タイトル文字を合成 -->
+<!-- imgで合成される画像は、backgroundが切り替わる時に自動的に破棄される。 -->
+
+<alignment left="50" top="200" right="50" bottom="0" />						<!-- テキストを表示する領域設定 -->
+
+<select>
+	<item href="#game">スタート</item>
+	<item href="#quit">終了</item>
+</select>
+</script>
+
+<destractor>
+<!-- このシーンを抜ける前に必ず処理される部分 -->
+<background color="#000000" method="fade" />							<!-- 暗転 -->
+<alignment left="0" top="0" right="0" bottom="0" />						<!-- アライメントを戻す -->
+</destractor>
+</scene>
+
+
+<!-- ########################################################################################################################### -->
+<!-- GAME -->
+<!-- ########################################################################################################################### -->
+<scene name="game">
+
+<script>
+<music media="CDDA" src="CDDA://Track02.cda" reload="true" loop="true" />
+<set name="game_start" />										<!-- フラグを立てる -->
+
+<background src="room.bmp" method="fade" />							<!-- 部屋のシーン -->
+<p>たとえばこんな感じにシナリオを書き込んでいきます。
+スクリプト中の改行、空白はすべて無視されます。</p>
+<p>このように段落が変われば自動的に改行が入ります。</p>
+<p name="俺">台詞をしゃべるぜ！</p>
+<p>分岐による状態変化はこのように処理します。</p>
+<p name="俺">さて、会社に出社だ！</p>
+<select>
+	<item href="#short">近道だぜ</item>
+	<item href="#long">いや、遠回りだ</item>
+</select>
+
+<!-- descriptorは省略可能 -->
+</script>
+</scene>
+
+<!-- ########################################################################################################################### -->
+<!-- SHORT -->
+<!-- ########################################################################################################################### -->
+<scene name="short" next="flag_test">
+<!-- シーンが終わったらどのシーンに進むかをnextで指定できる -->
+<script>
+<music media="CDDA" src="CDDA://Track02.cda" reload="false" loop="true" />
+<!-- このように、シーン毎に必ず曲再生を指定して、reloadをfalseにしておけば、
+ポカミスはなくなるでしょう。 -->
+<set name="short" />										<!-- shortフラグを立てる -->
+<reset name="long" />										<!-- longフラグを下ろす（意味なし） -->
+</script>
+</scene>
+
+<!-- ########################################################################################################################### -->
+<!-- LONG -->
+<!-- ########################################################################################################################### -->
+<scene name="long" next="flag_test">
+<script>
+<music media="CDDA" src="CDDA://Track02.cda" reload="false" loop="true" />
+<set name="long" />
+<reset name="short" />
+</script>
+</scene>
+
+<!-- ######################################################################################################################## -->
+<!-- FLAG_TEST -->
+<!-- ########################################################################################################################### -->
+<scene name="flag_test">
+<script security="short">
+<!-- このスクリプトはshortフラグが立っている時のみ実行される -->
+<music media="CDDA" src="CDDA://Track03.cda" reload="true" loop="false" />			<!-- ゲームオーバーの曲 -->
+<p>工事中だった</p>
+<p name="俺">急がば回れ、か・・・。しくしく、遅刻は減俸だよ。</p>
+</script>
+
+<script security="long">
+<!-- １つのシーンに複数のスクリプトを書ける -->
+<music media="CDDA" src="CDDA://Track04.cda" reload="true" loop="false" />			<!-- ハッピーエンドの曲 -->
+</script>
+
+<script>
+<goto name="quit" />
+</script>
+
+</scene>
+
+<!-- ########################################################################################################################### -->
+<!-- QUIT -->
+<!-- ########################################################################################################################### -->
+<scene name="quit">
+
+<end />												<!-- 終了 -->
+
+</scene>
+
+
+</body>
+
+</lpoint>

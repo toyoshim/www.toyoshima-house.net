@@ -1,0 +1,84 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888">
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■新MidiKitでSMF/SoftMIDIを扱うためのライブラリ ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">新MidiKitでSMF/SoftMIDIを扱うためのライブラリ</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			旧MidiKitがファイルしか入力にとれなかったため、
+			せっかくHTTPライブラリでBPositionIOを実装しても、
+			HTTP越しに取得したファイルを一度テンポラリファイルとして書きださねばなりませんでした。
+			これはちょっと悲しい・・・。
+			そんなわけで木坂さん達に相談したところ、新MidiKitの存在を知りました。
+			をを、これは、やる鹿。
+			<p>&nbsp;
+			新MidiKitでは、旧MidiKitのような、
+			内臓SoftMIDIやSMFを手軽に使えるAPIがありません（たぶん）。
+			というわけで、旧MidiKitをラップしてやり、新MidiKitのインターフェースとして実装した
+			内臓SoftMIDI、TxBMidiSynthConsumer。
+			そしてSMFの再生を新MidiKitのインターフェースとして実装したTxBMidiFileProducer。
+			この2つのクラスを作ってみました。これらを使うことで、
+			新MidiKitのインターフェースから手軽にSoftMIDI、SMFが扱えます。
+			またSMFのImportに関しても、entry_ref、メモリバッファ、BPositionIOを入力にとれるので、
+			旧MidiKitのBMidiuSynthFileよりも応用がきくと思います。
+			<br>&nbsp;<br><font size="+1">◆簡単なSMFプレイヤーのサンプル</font>
+			<p>&nbsp;
+			Register処理を省略することもできます。
+			Registerを行うと、外部からRoster経由でアクセスすることができ、
+			間にフィルタを挟んだりと、いかにもMidiKitな遊びが楽しめます。
+			再生は別スレッドで行われるので、演奏の終了を待ちたい場合には、WaitForStopを呼び出します。
+			<p>&nbsp;[サンプル]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">#include "TxBMidiSynthConsumer.h"
+#include "TxBMidiFileProducer.h"
+
+int
+main(int argc, char **argv)
+{
+	BApplication app("application/x-vnd.toyoshima-house.miditest");
+	TxBMidiSynthConsumer *midi = new TxBMidiSynthConsumer();
+	midi->Register();	// register to Roster
+
+	TxBMidiFileProducer *smf = new TxBMidiFileProducer();
+	smf->Register();	// register to Roster
+
+	smf->Connect(midi);
+
+	entry_ref midiRef;
+	get_ref_for_path(argv[1], &midiRef);
+	if (B_OK != smf->Import(&midiRef)) puts("import failed");
+	if (B_OK != smf->Play()) puts("play failed");
+	smf->WaitForStop();
+
+	smf->Unregister();	// unregister from Roster
+	smf->Release();
+	// Don't delete TxBMidiFileProducer
+
+	midi->Unregister();	// unregister from Roster
+	midi->Release();
+	// Don't delete TxBMidiSynthConsumer
+	return 0;
+}
+</font></pre></td></tr></table></div>
+			<br>&nbsp;<br><font size="+1">◆ダウンロード</font>
+			<p>&nbsp;
+			で、公開です。うまく再生できないファイルとかあったら教えていただけると直せるかもしれませんし、
+			直せないかもしれません。例によって、直して頂けると大変感謝します。
+			ライセンスはHTTPライブラリと同様Artisticあたりにしておきます。
+			<div align="center"><a href="./lib/midi_20000726.zip">2000/07/26 版</a></div>
+		</blockquote>
+		<div align="center"><a href="./index.html">すげーぜ！</a></div>
+		<hr width="80%">
+		<div align="center"><a href="../main.html"><img src="../banner/psbanner.jpg" width="200" height="40" border="0"></a></div>
+		&nbsp;<br>
+		<div align="right">CVS 最終更新 ---- $Id: lib_midi.html,v 1.1 2000/07/25 18:32:51 toyoshim Exp $</div>
+	</body>
+</html>

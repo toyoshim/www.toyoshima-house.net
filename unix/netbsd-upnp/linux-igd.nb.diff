@@ -1,0 +1,176 @@
+diff -cNr linux-igd.orig/Makefile linux-igd/Makefile
+*** linux-igd.orig/Makefile	Sat Dec 14 07:16:22 2002
+--- linux-igd/Makefile	Mon May  3 05:53:02 2004
+***************
+*** 1,6 ****
+  CC=g++
+! INCLUDES= -I/usr/include/upnp 
+! LIBS= -lpthread  /usr/lib/libupnp.so
+  
+  
+  ifeq ($(DEBUG),1)
+--- 1,6 ----
+  CC=g++
+! INCLUDES= -I/usr/include/upnp  -I/usr/pkg/include -I/usr/local/include
+! LIBS= -lpthread  /usr/local/lib/libupnp.so
+  
+  
+  ifeq ($(DEBUG),1)
+***************
+*** 9,15 ****
+  OPT = -O2
+  endif
+  
+! CFLAGS += -Wall -g $(OPT)
+  
+  APPS = upnpd
+  
+--- 9,15 ----
+  OPT = -O2
+  endif
+  
+! CFLAGS += -Wall -g $(OPT) -D_POSIX_THREAD_SYSCALL_SOFT
+  
+  APPS = upnpd
+  
+***************
+*** 26,32 ****
+  	rm -f *.o $(APPS)
+  
+  install: upnpd
+! 	@install -d /etc/linuxigd
+! 	@install etc/* /etc/linuxigd
+! 	@install upnpd /usr/bin
+  
+--- 26,32 ----
+  	rm -f *.o $(APPS)
+  
+  install: upnpd
+! 	@install -d /usr/local/etc/linuxigd
+! 	@install etc/* /usr/local/etc/linuxigd
+! 	@install upnpd /usr/local/bin
+  
+diff -cNr linux-igd.orig/gateway.cpp linux-igd/gateway.cpp
+*** linux-igd.orig/gateway.cpp	Tue Jan 14 07:11:20 2003
+--- linux-igd/gateway.cpp	Mon May  3 06:36:16 2004
+***************
+*** 49,54 ****
+--- 49,55 ----
+  
+  // The global GATE object
+  Gate gate;
++ char *ExtIf;
+  
+  // Callback Function wrapper.  This is needed because ISO forbids a pointer to a bound
+  // member function.  This corrects the issue.
+***************
+*** 108,113 ****
+--- 109,115 ----
+          //close (STDOUT_FILENO);
+          close (STDERR_FILENO);
+  
++ 	ExtIf = argv[2];
+  	gate.m_ipcon = new IPCon(argv[2]);
+  	address = gate.m_ipcon->IPCon_GetIpAddrStr();
+  	strcpy(lan_ip_address, address);
+diff -cNr linux-igd.orig/gateway.h linux-igd/gateway.h
+*** linux-igd.orig/gateway.h	Sat Dec 14 07:16:28 2002
+--- linux-igd/gateway.h	Mon May  3 05:50:14 2004
+***************
+*** 28,34 ****
+  
+  #define INIT_PORT          2869
+  #define INIT_DESC_DOC      "gatedesc"
+! #define INIT_CONF_DIR      "/etc/linuxigd/"
+  
+  #define GATE_SERVICE_SERVCOUNT  3
+  #define GATE_SERVICE_OSINFO             0
+--- 28,34 ----
+  
+  #define INIT_PORT          2869
+  #define INIT_DESC_DOC      "gatedesc"
+! #define INIT_CONF_DIR      "/usr/local/etc/linuxigd/"
+  
+  #define GATE_SERVICE_SERVCOUNT  3
+  #define GATE_SERVICE_OSINFO             0
+diff -cNr linux-igd.orig/ipcon.cpp linux-igd/ipcon.cpp
+*** linux-igd.orig/ipcon.cpp	Tue Jan 14 05:59:00 2003
+--- linux-igd/ipcon.cpp	Mon May  3 05:54:31 2004
+***************
+*** 25,31 ****
+--- 25,36 ----
+  #include <stdio.h>
+  #include <unistd.h>
+  #include <arpa/inet.h>
++ #ifdef __linux__
+  #include <linux/sockios.h>
++ #else
++ #include <sys/sockio.h>
++ #include <sys/socket.h>
++ #endif
+  #include <net/if.h>
+  #include <netinet/in.h>
+  #include <sys/ioctl.h>
+Binary files linux-igd.orig/ktrace.out and linux-igd/ktrace.out differ
+diff -cNr linux-igd.orig/pmlist.cpp linux-igd/pmlist.cpp
+*** linux-igd.orig/pmlist.cpp	Fri Jan  3 04:14:24 2003
+--- linux-igd/pmlist.cpp	Mon May  3 06:32:29 2004
+***************
+*** 31,36 ****
+--- 31,38 ----
+  #include <unistd.h>
+  #include <iostream>
+  
++ extern char *ExtIf;
++ 
+  PortMapList::PortMapList()
+  {
+  
+***************
+*** 181,189 ****
+--- 183,199 ----
+  	char *IntIP,int IntPort, int Enabled, char *Desc)
+  {
+  	char command[255];
++ #ifdef __linux__
+  
+  	sprintf(command,"/usr/sbin/iptables -t nat -A PREROUTING -p %s -d %s --dport %d -j DNAT --to %s:%d", Proto, ExtIP, ExtPort, IntIP, IntPort);
+  	system(command);
++ #else
++ 	FILE *ipnat = popen("/usr/sbin/ipnat -f -", "w");
++ 	if (ipnat == NULL) return 0;
++ 	snprintf(command, 255, "rdr %s %s/32 port %d -> %s port %d %s", ExtIf, ExtIP, ExtPort, IntIP, IntPort, Proto);
++ 	fprintf(ipnat, command);
++ 	pclose(ipnat);
++ #endif
+  
+  	return (1);
+  }
+***************
+*** 218,226 ****
+  {
+  	char command[255];
+  	
+! 
+  	sprintf(command, "/usr/sbin/iptables -t nat -D PREROUTING -p %s -d %s --dport %d -j DNAT --to %s:%d", Proto, ExtIP, ExtPort, IntIP, IntPort);
+  	system(command);	
+  	return (1);
+  }
+  
+--- 228,243 ----
+  {
+  	char command[255];
+  	
+! #ifdef __linux
+  	sprintf(command, "/usr/sbin/iptables -t nat -D PREROUTING -p %s -d %s --dport %d -j DNAT --to %s:%d", Proto, ExtIP, ExtPort, IntIP, IntPort);
+  	system(command);	
++ #else
++ 	FILE *ipnat = popen("/usr/sbin/ipnat -rf -", "w");
++ 	if (ipnat == NULL) return 0;
++ 	snprintf(command, 255, "rdr %s %s/32 port %d -> %s port %d %s", ExtIf, ExtIP, ExtPort, IntIP, IntPort, Proto);
++ 	fprintf(ipnat, command);
++ 	pclose(ipnat);
++ #endif
+  	return (1);
+  }
+  

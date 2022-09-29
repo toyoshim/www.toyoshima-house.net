@@ -1,0 +1,125 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <meta name="Author" content="TOYOSHIMA Takashi">
+  <link rel="stylesheet" href="/common.css">
+  <title>TOYOSHIMA HOUSE - Windows CE (HPC/PocketPC)</title>
+  <script language="JavaScript">
+   document.cookie = "to_en=";
+   document.cookie = "to_ja=";
+  </script>
+  <script language="JavaScript" src="/menu.js"></script>
+ </head>
+ <body>
+  <h1>Windows CE (HPC/PocketPC)</h1>
+  <h2>WinAmp-like mp3 player - Poemi - for HPC/PocketPC</h2>
+  <p>Now under development....
+  <div align="center"><img src="http://www.toyoshima-house.net/diary/gomi/20020330065749.jpg"></div>
+  <p>mp3, MOD, etc... plug-ins are available:)
+  <div align="center"><img src="http://www.toyoshima-house.net/diary/gomi/20020331131120.jpg"></div>
+  <h2>Tips: using gcc for hpcmips on UNIX</h2>
+  <p>2002/4/10: <em>revised</em>
+  <blockquote><ul>
+   <li>include.tar.gz (w32api 1.2 section)
+   <li>gcc_Makefile.diff (gcc 3.0.4 section)
+   <li>-e _DllMainCRTStartup flag (building DLL section)
+   <li>using C++ section added
+  </ul></blockquote>
+  <h3>binutils 2.11.2 (assembler, linker, etc...)</h3>
+  <pre class="shell">
+$ tar zxvf .../binutils-2.11.2.tar.gz
+$ cd binutils-2.11.2
+$ mkdir build
+$ cd build
+$ ../configure --prefix=/usr/local/wince --target=mips-pe
+$ make
+$ sudo make install
+</pre>
+  <p>If you want to install to another path, you shold change prefix parameter so that you like.
+  <h3>gcc 3.0.4 (C/C++ compiler)</h3>
+  <pre class="shell">
+$ tar zxvf .../gcc-core-3.0.4.tar.gz
+$ tar zxvf .../gcc-g++-3.0.4.tar.gz
+$ cd gcc-3.0.4
+$ mkdir build
+$ cd build
+$ ../configure --prefix=/usr/local/wince --target=mips-pe --with-gnu-as
+$ patch < .../<a href="gcc_Makefile.diff">gcc_Makefile.diff</a>
+$ make
+$ sudo make install
+$ cd /usr/local/wince/lib/gcc-lib/mips-pe/3.0.4
+$ patch < .../<a href="specs.diff">specs.diff</a>
+</pre>
+  <p>I made a patch file for specs. it fix followings.
+  <ul>
+   <li>startupfile (change crt0.o to -lcorelibc)
+   <li>predefines (-DUNICODE, -DUNDER_CE)
+   <li>default endien (little)
+   <li>L prefixed unicode string type (not 32bit but 16bit)
+   <li>default library path (/usr/local/wince/lib/mips)
+  </ul>
+  <p>So if you installed another path you should fix this spec file or use -L flags on linking.
+  <p>gcc_Makefile.diff is also needed for building libgcc.a as little-endian binary. Unless this patch, libgcc.a may be for big endian.
+  <h3>w32api 1.2 (include files)</h3>
+  <pre class="shell">
+$ tar zxvf w32api-1.2.tar.gz
+$ cp -rf include/* /usr/local/wince/include/
+$ rm -rf include lib
+$ cd /usr/local/wince/include
+$ patch -p1 < .../<a href="w32api-1.2-hpcmips.diff">w32api-1.2-hpcmips.diff</a>
+$ tar zxvf < .../<a href="include.tar.gz">include.tar.gz</a>
+</pre>
+  <ul>
+   <li>string.h
+    <blockquote>In CE, we can use str* and wcs* functions with coredll. This is prototype for that.</blockquote>
+   <li>windef.h
+    <blockquote>gcc for mips don't support __attribute__((cdecl)) and __attribute__((stdcall)), but it's not needed on mips to begin with.</blockquote>
+   <li>winnt.h
+    <blockquote>gcc define _MIPSEL instead of MIPS.</blockquote>
+  </ul>
+  <h3>HPC30SDK (library files)</h3>
+  <pre class="shell">
+$ mdkir /usr/local/wince/lib/hpcpro
+$ cp -rf .../HPC30SDK/Lib/* /usr/local/wince/lib/hpcpro
+$ cd /usr/local/wince/lib/hpcpro/mips
+$ for f in *.lib; do mv $f lib${f/.lib/.a}; done
+</pre>
+  <p>You can get SDKs for CE from Microsoft's website freely.
+  <h3>other setup</h3>
+  <pre class="shell">
+$ export PATH="/usr/local/wince/bin:$PATH"
+</pre>
+  <p>If you use only this cross compiler, add "/usr/local/wince/mips-pe/bin" too. With it you type just gcc instead of mips-pe-gcc.
+  <h3>test</h3>
+  <pre class="source">/* test.c */
+#include &lt;windows.h&gt;
+
+int WINAPI WinMain
+(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
+{
+    MessageBox(NULL, L"compiled by gcc 3.0.4", L"TEST", MB_OK);
+    return 0;
+}
+</pre>
+  <pre class="shell">
+$ mips-pe-gcc -o test.exe test.c -lcoredll
+</pre>
+  <h3>building DLL</h3>
+  <pre class="source">
+; test.def
+EXPORTS
+    FooFunc @1
+    BarFunc
+</pre>
+  <pre class="shell">
+$ mips-pe-gcc -shared -e _DllMainCRTStartup -o test.dll test.def foo.o bar.o -lcoredll
+</pre>
+  <h3>using C++</h3>
+  <p>Using C++, you may get error "undefined reference to '__gxx_personality_v0'" on link phase. You can avoid from this error with <b>-fno-exceptions</b> flag. But in this way, you can not use any exceptions, You know.
+  <hr class="footer">
+  <div class="id">$Id: index.html,v 1.4 2002/04/09 19:35:57 toyoshim Exp $</div>
+ </body>
+</html>

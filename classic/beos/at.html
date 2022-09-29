@@ -1,0 +1,268 @@
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS" />
+	<meta name="Author" content="とよしま" />
+	<meta name="KeyWords" content="BeOS; Translator" />
+	<title>ArchiveTranslator 仕様案</title>
+</head>
+<body bgcolor="#ffffffff">
+<h1>はじめに</h1>
+<p>これは、BeOSのTranslatorの機構を利用して、汎用的にアーカイブを扱うための仕様第4案です。</p>
+<h1>仕様案</h1>
+<p>今のところ、実際のコードと簡単なコメントしかありません。
+が、開発に必要な情報はほぼ満足していると思います。
+ファイルサイズや時間については余裕をもって64bitで扱っています。
+いわゆるbigtime_tとかlong longの類いです。</p>
+
+<h2>共通ヘッダ（ArchiveTranslator.h）</h2>
+<pre>// (TranslationGroups)
+#define	B_TRANSLATOR_ARCHIVE		'Arc*'
+#define	B_TRANSLATOR_ARCHIVE_LIST	'ArcL'
+#define	B_TRANSLATOR_ARCHIVE_STATUS	'ArcS'
+#define	B_TRANSLATOR_ARCHIVE_REMOVE	'ArcR'
+#define	B_TRANSLATOR_ARCHIVE_APPEND	'ArcA'
+
+// for ioExtension
+#define	B_TRANSLATOR_EXT_ARCHIVE_TARGET		"Arc/target"		// int32
+#define	B_TRANSLATOR_EXT_ARCHIVE_ENTRY		"Arc/entry"		// String
+#define	B_TRANSLATOR_EXT_ARCHIVE_STATUS		"Arc/status"		// BMessage
+#define	B_TRANSLATOR_EXT_ARCHIVE_NOTIFIER	"Arc/notifier"		// BMessenger
+#define	B_TRANSLATOR_EXT_ARCHIVE_MESSAGE	"Arc/message"		// BMessage
+#define	B_TRANSLATOR_EXT_ARCHIVE_ASIS		"Arc/asis"		// bool
+#define	B_TRANSLATOR_EXT_ARCHIVE_CONTINUOUS	"Arc/continuous"	// bool
+#define	B_TRANSLATOR_EXT_ARCHIVE_COOKIE		"Arc/cookie"		// free namespace for Translator
+
+// for B_TRANSLATOR_EXT_ARCHIVE_STATUS
+#define	kArchiveFileName	"filename"	// String
+#define	kArchiveRatio		"ratio"		// int32
+#define	kArchiveFormatName	"format"	// String
+#define	kArchiveCrc		"crc"		// int32
+#define	kArchiveOsType		"ostype"	// int32
+#define	kArchiveAccessTime	"atime"		// int64
+#define	kArchiveCreationTime	"crtime"	// int64
+#define	kArchiveModificationTime "mtime"	// int64
+#define	kArchiveChangeTime	"ctime"		// int64
+#define	kArchiveCompressedSize	"csize"		// int64
+#define	kArchiveOriginalSize	"size"		// int64
+#define	kArchiveMode		"mode"		// int32
+#define	kArchiveUid		"uid"		// int32
+#define	kArchiveGid		"gid"		// int32
+#define kArchiveAttr		"attr"		// BMessage
+
+// for B_TRANSLATOR_EXT_ARCHIVE_MESSAGE
+#define	kArchiveNotifierEnd	"notifier/end"		// int64
+#define	kArchiveNotifierCurrent	"notifier/current"	// int64
+</pre>
+
+<h2>展開を利用するコード例</h2>
+<pre>BTranslator *tr;	// BTranslatorRosterから取得した適切なTranslator
+...
+BFile file("foo/bar.zip", O_RDONLY);	// 展開するファイル（入力）
+BMessage msg;
+status_t rc;
+
+// 一覧の取得
+//	ここではBMessageの指定を必須とします（NULLは不可）。
+//	出力のファイルタイプをB_TRANSLATOR_ARCHIVE_LIST
+//	と指定することで、Translatorは一覧を出力します。
+//	この際、一覧はoutではなくmsgに出力されます。
+rc = tr->Translate(&amp;file, NULL, &amp;msg, B_TRANSLATOR_ARCHIVE_LIST, NULL);
+if (B_OK != rc) throw rc;
+
+// 一覧の利用
+//	総ファイル数はB_TRANSLATOR_EXT_ARCHIVE_ENTRYの個数で判断します。
+//	またTranslatorは、目的のファイルを展開するたびにヘッダ解析などの処理を
+//	行わなくても済むよう、BMessage内に作業データを忍ばせることができます。
+//	（スレッドセーフなコードを書くためにはTranslator内部にデータを保持する事は
+//	できないのです）
+//	よって、一覧の取得からファイル情報の取得・展開にいたるまで、常に同じ
+//	BMessageオブジェクトを渡し続ける必要があります。
+//	（入力のBPositionIOと入出力のBMessageは対で扱われなければなりません）
+int32 n;
+rc = msg.GetInfo(B_TRANSLATOR_EXT_ARCHIVE_ENTRY, B_MESSAGE_TYPE, &n);
+if (B_OK != rc) throw rc;
+for (int32 i = 0; i &lt; n; i++) {
+	const char *target;
+	rc = msg.FindString(B_TRANSLATOR_EXT_ARCHIVE_ENTRY, i, &amp;target);
+	if (B_OK != rc) continue;
+	printf("%d: filename = %s\n", i, target);
+	
+	// ファイル情報の取得
+	//	目標ファイルをB_TRANSLATOR_EXT_ARCHIVE_TARGETにより設定します。
+	//	複数の目標を設定することも可能です。
+	//	出力タイプにはB_TRANSLATOR_ARCHIVE_STATUSを設定します。
+	rc = msg.RemoveName(B_TRANSLATOR_EXT_ARCHIVE_TARGET);
+	if (B_OK == rc) rc = msg.AddInt32(B_TRANSLATOR_EXT_ARCHIVE_TARGET, i);
+	if (B_OK == rc) rc = tr->Translate(&amp;file, NULL, &amp;msg, B_TRANSLATOR_ARCHIVE_STATUS, NULL);
+	if (B_OK != rc) continue;
+
+	//	これで設定したファイルについての情報が取得できました。
+	//	B_TRANSLATOR_EXT_ARCHIVE_STATUSにはkArchive*で定義された情報が格納されています。
+	//	ただしこれらの情報はかならずしもすべてが得られるわけではなく、
+	//	その書庫形式が対応している情報のみが得られます。
+	BMessage status;
+	rc = msg.FindMessage(B_TRANSLATOR_EXT_ARCHIVE_STATUS, 0, &amp;status);
+	if (B_OK == rc) {
+		// ファイルの展開
+		//	目的のファイルはB_TRANSLATOR_EXT_ARCHIVE_TARGETにより設定します。
+		//	ただし、展開の場合には複数ファイルの指定はできません。
+		//	（このサンプルでは前回すでに設定した値を再利用しています）
+		BFile out(target, O_WRONLY);	// 出力ファイル
+		rc = tr->Translate(&amp;file, NULL, &msg, B_TRANSLATOR_ANY_TYPE, &out);
+	}
+	if (B_OK != rc) continue;
+	//	展開に成功しました。
+	//	例えばここで先程取得したデータをファイルに反映させます。
+	int32 mode;
+	rc = status.FindInt32(kArchiveMode, &mode);
+	if (B_OK == rc) chmod(target, (mode_t)mode);
+	...
+	stauts.MakeEmpty();
+}
+</pre>
+<h2>圧縮を利用するコード例</h2>
+<pre>BTranslator *tr;	// すでに取得済みのTranslator
+...
+BFile out("foo/bar.zip");	// 追加先のファイル
+char *fname = "file.in";
+struct stat st;
+if (0 != stat(fname, &st)) throw -1;
+BFile file(fname);	// 追加したいファイル
+BMessage status;	// ファイル情報の格納用
+//　あらかじめ必要な情報をBMessageに格納します。
+//　kArchiveModeについては、0777（ugoに対するそれぞれのrwx情報）の範囲で有効とします。
+if (B_OK != status.AddString(kArchiveFileName, fname)) throw -1;
+if (B_OK != status.AddInt64(kArchiveAccessTime, (int64)st.st_atime)) throw -1;
+if (B_OK != status.AddInt64(kArchiveCreationTime, (int64)st.st_crtime)) throw -1;
+if (B_OK != status.AddInt64(kArchiveModificationTime, (int64)st.st_mtime)) throw -1;
+if (B_OK != status.AddInt64(kArchiveChangeTime, (int64)st.st_ctime)) throw -1;
+if (B_OK != status.AddInt64(kArchiveOriginalSize, (int64)st.st_size)) throw -1;
+if (B_OK != status.AddInt64(kArchiveMode, (int32)(st.st_size & 0777))) throw -1;
+...
+
+// 書庫に追加
+BMessage msg;
+if (B_OK != msg.AddMessage(B_TRANSLATOR_EXT_ARCHIVE_STATUS, &status)) throw -1;
+statuc_t rc = tr->Translate(&file, NULL, &msg, B_TRANSLATOR_ARCHIVE_APPEND, &out);
+if (B_OK != rc) throw rc;
+
+</pre>
+<h2>書庫から特定のエントリを削除するコード例</h2>
+<pre>BTranslator *tr;	// すでに取得済みのTranslator
+BMessage msg;	// ioExtension用のBMessage
+BFile file("foo/bar.zip");	// 対象となる書庫
+int target;	// 目的のファイル
+...
+//　ここまでの操作で、すでに一覧取得などをして
+//　目的のファイルの目星がついているとします。
+//　この時、もしも出力側にNULL以外が指定されていた場合には、
+//　削除したファイル自身をそこへ書きだします。
+//　（ただし、ファイル情報についてはBMessageには出力される保証はないので
+//　事前にB_TRANSLATOR_ARCHIVE_STATUSで確認しておく必要があります）
+if (B_OK != msg.AddInt32(B_TRANSLATOR_EXT_ARCHIVE_TARGET, target)) throw -1;
+status_t rc = tr->Translate(&file, NULL, &msg, B_TRANSLATOR_ARCHIVE_REMOVE, NULL);
+if (B_OK != rc) throw -1;
+
+</pre>
+<h2>書庫操作におけるオプションフラグについて</h2>
+<p>書庫への追加・書庫からの削除を行う際に、大量処理時の最適化の余地としてフラグが定義されています。
+１つはB_TRANSLATOR_EXT_ARCHIVE_ASIS、もう１つはB_TRANSLATOR_EXT_ARCHIVE_CONTINUOUSです。</p>
+<p>前者は、同じTranslatorを経由するような同種の書庫間で、ファイルを移動するような時に利用します。
+例えば、削除時に
+<pre>msg1.AddBool(B_TRANSLATOR_EXT_ARCHIVE_ASIS, true);
+tr->Translate(&file1, NULL, &msg1, B_TRANSLATOR_ARCHIVE_REMOVE, &tmp);
+</pre>
+などとすることで、ファイルを圧縮した状態のままtmpへと取り出します。
+この状態で、そのまま
+<pre>msg2.AddBool(B_TRANSLATOR_EXT_ARCHIVE_ASIS, true);
+tr->Translate(&tmp, NULL, &msg2, B_TRANSLATOR_ARCHIVE_APPEND, &file2);
+</pre>
+とすることで、file1からfile2へ圧縮したまま書庫を移動することができます。
+ただし、ファイル情報についてはやはり情報取得を使って、移動する必要があります。
+また、Translator側が必ずしもこのフラグに対応しているとは限らず、
+対応していない場合には、解凍した状態で吐き出す（フラグを無視する）、
+あるいは取り出す時点でエラーを返す（フラグは見るが対応していないと通知）、
+の2通りの挙動が考えられます。
+</p>
+<p>後者は連続して書庫に操作を加える場合などに用います。
+書庫の形式によっては、操作完了後に、書庫全体の情報を再構築しなければならず、
+この処理に非常にコストがかかる場合があります。
+そのような場合にはこのフラグを利用して下さい。
+Translator側は、このフラグが立っている場合には、
+次に必ずB_TRANSLATOR_ARCHIVE_REMOVE
+またはB_TRANSLATOR_ARCHIVE_APPENDの処理が来ると仮定してかまいません。
+また、利用者側はB_TRANSLATOR_ARCHIVE_CONTINUOUSを１度指定したら、
+このフラグを降ろした状態でB_TRANSLATOR_ARCHIVE_REMOVEまたは
+B_TRANSLATOR_ARCHIVE_APPENDを呼び出すまで、その他いっさいの処理について
+成功する保証が得られません。また、そのまま終了した場合には、書庫ファイルの
+一貫性すら損ねる可能性があります。利用の際には十分な注意が必要です。
+</p>
+<h2>状況通知</h2>
+<p>すべての動作において、その進行状況を通知できるような仕組みが提供されています。
+これはもちろんオプションの機能で、すべてのTranslatorが実装しているとは限りません。</p>
+<p>通知を受けるには、Translateを呼び出す際にioExtensionに
+B_TRANSLATOR_EXT_ARCHIVE_NOTIFIER、B_TRANSLATOR_EXT_ARCHIVE_MESSAGEを指定して下さい。
+B_TRANSLATOR_EXT_ARCHIVE_NOTIFIERがメッセージの通知先になります。B_TRANSLATOR_EXT_ARCHIVE_MESSAGEについては指定しなくても構いません。
+指定された場合はそのBMessageに情報を追加した形でメッセージが届きます。
+指定されなかった場合には、素のBMessageに通知情報をのせたメッセージが届きます。</p>
+<p>通知情報はkArchiveNotifierEndとkArchiveNotifierCurrentの２つで、
+kArchiveNotifierEndは全処理の工程数、kArchiveNotifierCurrentは
+現在処理している工程を表します。これらは、一覧取得時にはエントリ数、
+展開・圧縮時にはサイズが工程の単位として扱われます。
+<h2>Cookieについて</h2>
+<p>この仕様により、入力のBPositionIOとBMessageは必ず1対1に対応していることが
+保証されるため、Translatorは作業中のデータをBMessage内部に保持することができます。
+（この時、BMessage内で作業領域として利用できる名前はkArchiveCookieExtension
+あるいはその後ろにスラッシュと任意の文字列を繋げた名前とします。）
+展開時など、Translatorは次のような処理が考えられます。</p>
+<pre>status_t
+Expand
+(BPositionIO *in, const translator_info *info, BMessage *msg, uint32 type, BPositionIO *out)
+{
+	status_t rc;
+	int32 n;
+	rc = msg->FindInt32(kTargetExtension, &amp;n);
+	if (B_OK != rc) return B_ERROR;
+	int32 offset;
+	int32 src_size;
+	int32 dst_size;
+	rc = msg->FindInt32(kArchiveCookieExtension "/offset", n, &amp;offset);
+	if (B_OK == rc) rc = msg->FindInt32(kArchiveCookieExtension "/ssize", n, &amp;src_size);
+	if (B_OK == rc) rc = msg->FindInt32(kArchiveCookieExtension "/dsize", n, &amp;dst_size);
+	if (B_OK != rc) return B_BAD_INDEX;
+	off_t pos = in->Seek(offset, SEEK_SET);
+	if (pos != offset) return B_ERROR;
+	...
+}
+
+status_t
+Translate
+(BPositionIO *in, const translator_info *info, BMessage *msg, uint32 type, BPositionIO *out)
+{
+	switch (type) {
+	case B_TRANSLATOR_ARCHIVE_LIST:
+		return MakeList(in, info, msg, type, out);
+	case B_TRANSLATOR_ARCHIVE_STATUS:
+		return Status(in, info, msg, type, out);
+	case B_TRANSLATOR_ANY_TYPE:
+		return Expand(in, info, msg, type, out);
+	}
+	return B_NO_TRANSLATOR;
+}
+</pre>
+<h2>適切なTranslatorの検索方法</h2>
+<p>(to be written)</p>
+<h2>その他Translatorについて</h2>
+<p>(obsolete)</p>
+<p>inputFormatsについては、「任意のタイプ / B_TRANSLATOR_ARCHIVE」をサポートして下さい。</p>
+<p>outputFormatsについては、「B_TRANSLATOR_ANY_TYPE / B_TRANSLATOR_ARCHIVE」と、
+「B_TRANSLATOR_ARCHIVE_LIST / B_TRANSLATOR_ARCHIVE」、そして
+「B_TRANSLATOR_ARCHIVE_STATUS / B_TRANSLATOR_ARCHIVE」 の3種類をサポートして下さい。</p>
+
+<h2>Special Thanks</h2>
+<a href="http://www.nekome.net/">ゆん</a>さん<br>
+<a href="http://www.gopherwood.com/staff/noah/">KT</a>さん<br>
+<a href="http://www2u.biglobe.ne.jp/~shinta/">SHINTA</a>さん<br>
+<p>$Id: at.html,v 1.9 2001/04/27 05:58:21 toyoshim Exp $</p>
+</body>
+</html>

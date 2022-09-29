@@ -1,0 +1,23 @@
+#TITLE	<main theme of 'Lain for PlayStation'>
+#CHANNEL 5
+
+#WAV	0,<(127, 127),16, (-127, -127),16>
+
+#A	t81
+	$ %3 x1,2 l8 v15 o6 q1 s3 mp30,16,2,8
+	/:a48<fred rdgf eder er4f edc>a <fr4/>b< c+der4^64:/dfrer>f48<dr2..^32
+	/:arcaregfb-derer4/er4dcar4.:/dr4c#r2^8
+
+#B	$ %3 x1,2 l8 v15 o7 q1 s2 mp30,16,2,8
+	/:r64dr4. r1r1r4./r4.c+r4^48:/r2^8^64>ar2..^24<
+	/:cr4c#r4r2crcr4/cr2c2:/>b-r4.ar2
+
+#C	$ %3 x1,2 l8 v15 o5 q1 s2 mp30,16,2,8
+	/:f<drfarb-agr<crc>ceb-r4>a<car4./rf>ar4 r64^48:/<frc+rdr2..^32^24>
+	/:f<cr4arb-agr<cr>c/egb-eb->f<cfr4.:/egb-dfec+egfe
+
+#D	$ %4 @0 x1,2 @i1,0 @o2,0 v10 o2 q16 mp30,16,2,8
+	c1
+
+#E	$ %4 @0 x1,2 @i4,0 @o0 v12 o3 q16 mp30,16,2,8
+	c1

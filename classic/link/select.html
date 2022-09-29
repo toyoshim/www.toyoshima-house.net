@@ -1,0 +1,611 @@
+<HTML>
+  <HEAD>
+    <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=EUC-JP">
+    <TITLE>¤È¤è¤·¤Þ¥Ï¥¦¥¹¡Á¥ê¥ó¥¯¥»¥ì¥¯¥¿¡Á</TITLE>
+
+    <SCRIPT LANGUAGE="JavaScript">
+
+/*
+ * ¥°¥í¡¼¥Ð¥ëÊÑ¿ô
+ */
+// ÊýË¡
+var method, banner;
+
+// ¥Á¥§¥Ã¥¯¹àÌÜ
+var x68, win, mac;
+var grp, mus, dev, apl;
+var allpage, newpage;
+
+/*
+ * ¥Þ¥¯¥í¤â¤É¤­
+ */
+function Open(){parent.List.document.open();}
+function Close(){parent.List.document.close();}
+function Write(html){parent.List.document.write(html);}
+function Method(){return document.mode.elements[0].checked;}
+function Banner(){return document.mode.elements[2].checked;}
+function Check(item){
+  var prog;
+  prog = 'document.item.' + item + '.checked';
+  return eval(prog);
+}
+
+
+/*
+ * ¥Û¡¼¥à¥Ú¡¼¥¸¥¯¥é¥¹
+ */
+function Homepage()
+{
+  this.banner;
+  this.title;
+  this.url;
+  this.info;
+  this.banner_ext = false;
+  this.title_ext = false;
+
+  this.link = false;
+
+  this.x68 = false;
+  this.win = false;
+  this.mac = false;
+  this.grp = false;
+  this.mus = false;
+  this.dev = false;
+  this.apl = false;
+  this.newpage = false;
+}
+
+
+/*
+ * ³Æ¥Á¥§¥Ã¥¯¥Ü¥Ã¥¯¥¹¤ÎÆâÍÆ¤òÄ´¤Ù¤ÆÊÑ¿ô¤ËÊÝ»ý¤¹¤ë
+ */
+function CheckParam()
+{
+  var prog;
+
+  method = Method();
+  banner = Banner();
+
+  for(i in param){
+    prog = param[i] + '= Check("' + param[i] + '")';
+    eval(prog);
+  }
+}
+
+
+/*
+ * ³Æ¥Û¡¼¥à¥Ú¡¼¥¸¤¬¥Á¥§¥Ã¥¯¹àÌÜ¤ÎÍ×¹à¤òÌ ¤¿¤¹¤«Ä´¤Ù¤ë
+ */
+function CheckFlag(checkpage)
+{
+  var prog;
+  var flag;
+
+  if(allpage)
+    return true;
+
+  if(method){
+    /* and */
+    flag = false;
+    for(i in param){
+      if(eval(param[i])){
+	flag = true;
+	prog = 'checkpage.' + param[i];
+	if(eval(prog) != true){
+	  return false;
+	}
+      }
+    }
+    return flag;
+  }else{
+    /* or */
+    for(i in param){
+      if(eval(param[i])){
+	prog = 'checkpage.' + param[i];
+	if(eval(prog))
+	  return true;
+      }
+    }
+    return false;
+  }
+}
+
+
+/*
+ * ³Æ¥Û¡¼¥à¥Ú¡¼¥¸¤Î¥ê¥ó¥¯¤òÉ½¼¨¤¹¤ë
+ */
+function WriteLink(page)
+{
+  Write('<TR><TD');
+  if(banner){
+    if(page.banner_ext)
+      Write(' ' + page.banner_ext + '>');
+    else
+      Write('>');
+  }else{
+    if(page.title_ext)
+      Write(' ' + page.title_ext + '>');
+    else if(page.banner_ext)
+      Write(' ' + page.banner_ext + '>');
+    else
+      Write('>');
+  }
+
+  Write('<CENTER><A HREF="' + page.url + '" TARGET=TOP>');
+  if(banner)
+    Write(page.banner);
+  else if(page.title)
+    Write(page.title);
+  else
+  	Write(page.banner);
+  Write('</A></CENTER></TD>');
+
+  Write('<TD BGCOLOR="#ffffcc"><CENTER><FONT SIZE=-2>');
+  Write(page.info);
+  if(page.link)
+    Write('<P><B><I><FONT COLOR="#f03050">[Áê¸ß¥ê¥ó¥¯]</FONT></I></B></P>');
+  Write('</FONT></CENTER></TD></TR>\n');
+}
+
+/*
+ * ¥ê¥ó¥¯¥ê¥¹¥È¤Î¥Õ¥ì¡¼¥à¤òÉ½¼¨¤¹¤ë
+ */
+
+function Display()
+{
+  var i;
+  var flag;
+
+  Open();
+  Write('<HTML><HEAD><META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=euc-jp"><BODY BGCOLOR="#f0c0c0">');
+
+  Write('<CENTER><FONT COLOR="#3080a0"><H2>¤ªµ¤¤ËÆþ¤ê¡õ¤ªÍ§Ã£¤Î¥Ú¡¼¥¸¤Ø¥ê¥ó¥¯</H2></FONT></CENTER>');
+  Write('<TABLE BORDER="5" COLS="2"><CENTER>\n');
+
+  CheckParam();
+
+  flag = false;
+  for(i = 0; i<numOfPage; i++){
+    if(CheckFlag(page[i])){
+      flag = true;
+      WriteLink(page[i]);
+    }
+  }
+
+  Write('</CENTER></TABLE>');
+
+  if(!flag)
+    Write('<CENTER>³ºÅö¤¹¤ë¥Ú¡¼¥¸¤Ï¤¢¤ê¤Þ¤»¤ó¡£</CENTER>');
+
+  Write('<CENTER><TABLE BORDER=5><TR><TD><IMG SRC="../banner/psbanner.jpg" WIDTH=200 HEIGHT=40 ALT="¤È¤è¤·¤Þ¥Ï¥¦¥¹"></TD></TR><TR><TD><CENTER><FONT SIZE=-2>¿·¥ê¥ó¥¯ÍÑ¥Ð¥Ê¡¼</FONT></CENTER></TH></TR></TABLE></CENTER>');
+
+
+  Write('</BODY></HTML>');
+  Close();
+}
+
+
+/*
+ * ¥Û¡¼¥à¥Ú¡¼¥¸¥Ç¡¼¥¿½é´ü²½
+ */
+// Á´¥Û¡¼¥à¥Ú¡¼¥¸¿ô
+var numOfPage = 34;
+var page = new Array(numOfPage);
+
+// ¥Á¥§¥Ã¥¯¹àÌÜ¥ê¥¹¥È
+var param = new Array("x68", "win", "mac", "grp", "mus", "dev", "apl", "allpage", "newpage");
+
+page[0] = new Homepage();
+page[0].banner = '<IMG SRC="../banner/nekobnr01.gif" ALT="¤Í¤³¤Ã¤Á¤ã¤À¤¤¤¹¤­¡ª" WIDTH=200 HEIGHT=40 BORDER="0">';
+page[0].banner_ext = 'BGCOLOR="#FFFFFF"';
+page[0].title = '<BLOCKQUOTE><B><DIV ALIGN="LEFT"><FONT COLOR="#000088">Aohebi\'s Home Page</FONT></DIV><FONT COLOR="#ffc0c0" SIZE="+2">¤Í¤³¤Ã¤Á¤ã<BR>¡¡¡¡¤À¤¤¤¹¤­¡ª<BR></FONT><DIV ALIGN="right"><FONT COLOR="#0000aa">NEKO_CHA DAISUKI!</FONT></DIV></B></BLOCKQUOTE>';
+page[0].url = 'http://www.sasami-unet.ocn.ne.jp/aohebi/';
+page[0].info = '¿·Áõ³«Å¹¤·¤¿Æ£¸¶¤µ¤ó¤Î¥Ú¡¼¥¸¡£ºÇ¶á¤ÏLeaf¤äTactics¤Î¥Î¥Ù¥ë·Ï¤ÎÏÃÂê¤ä¡¢¡Ö¤Ë¤ç¤Ë¤ç¤Ë¤ç¤Ë¤ç¤Ë¤ç¤Ë¤ç¤Ë¤ç¤Ë¤ç¢ö¡×¤ÊÏÃÂê¤â¡Ê¾Ð¡Ë¡£¥µ¥ß¡¼¤Î¥Ú¡¼¥¸¤â·òºß¤Ç¤¹¡ª';
+page[0].link = true;
+page[0].grp = true;
+
+page[1] = new Homepage();
+page[1].banner = '<IMG SRC="../banner/sarunikki.gif" ALT="¥µ¥ëÆüµ­WWWÈÇ" WIDTH=226 HEIGHT=110 BORDER="0">';
+page[1].banner_ext = 'BGCOLOR="#000000"';
+page[1].title = '<FONT SIZE=+5 COLOR="#ffffff">¥µ¥ëÆüµ­<BR>WWWÈÇ</FONT>';
+page[1].url = 'http://www02.so-net.ne.jp/~ubukawa/';
+page[1].info = '¹â¹»¼ Âå¤ÎÍ§¿Í¡¢±­À¸Àî»á¤Ë¤è¤ë¤ªÃãÌÜ¤Ç¥­¥å¡¼¥È¤Ê¥Ú¡¼¥¸¡£MSX¤Ç³èÌö¤·¤Æ¤¤¤¿¥¤¥â¥×¥í¤ÎÌÌ¡¹¤¬½¸¤Þ¤ë¥Ú¡¼¥¸¤Ç¤â¤¢¤ê¤Þ¤¹¡£Web¥Ú¡¼¥¸¾å¤Ç¤â¡Ö¤¢¤Î¥Î¥ê¡×¤Ç¤¹¡£¤³¤ì¤ÏÍ×¥Á¥§¥Ã¥¯¤À¡ª<BR>²ø¤·¤¤¥²¡¼¥à¡Ö¥Ð¥±¥â¥ó¡×¤¬³Æ»ï¤Ë·ÇºÜ¤µ¤ì¥¢¥¯¥»¥¹¾å¾ºÃæ¡ª¡©';
+page[1].link = true;
+page[1].win = true;
+page[1].apl = true;
+
+page[2] = new Homepage();
+page[2].banner = '<IMG SRC="../banner/msfield.png" ALT="MS.Field" WIDTH=200 HEIGHT=40 BORDER="0">';
+page[2].banner_ext = 'BGCOLOR="#ffffff"';
+page[2].title = '<H2><FONT COLOR="#0000ff"><I>MS.Field</I></FONT></H2>';
+page[2].url = 'http://www.isl.cs.gunma-u.ac.jp/%7Eshingo/';
+page[2].info = '¤³¤ì¤Þ¤¿¹â¹»¼ Âå¤ÎÍ§¿Í¡£¥¤¥â¥×¥íÆâ¤Ç¤â¡Ö¥ê¥Á¥ã¡¼¥É¡×¤È¤·¤ÆÍ­Ì¾¤ÊÐÖÅÄ»á¤Î¥Ú¡¼¥¸¡£·ë¹½¤¤¤í¤¤¤í¤¢¤ê¤Þ¤¹¡£<BR>¼Â¤Ï»ä¤â¤¹¤Ù¤Æ¤ò¸«¤¿¤ï¤±¤Ç¤Ï¤Ê¤¤(^^;<BR>¡Öµí¤Ë¤Ê¤ì¡ª¡×¤È¤«Ì¯¤Ê¾®Àâ¤¬¤¢¤ê¤Þ¤¹¡Ê¾Ð¡Ë¡£';
+page[2].link = true;
+page[2].win = true;
+page[2].dev = true;
+page[2].apl = true;
+
+page[3] = new Homepage();
+page[3].banner = '<IMG SRC="http://www.din.or.jp/~yamu/img/yamu_bn.gif" ALT="Reverse Noise" WIDTH=200 HEIGHT=40>';
+page[3].banner_ext = 'BACKGROUND="http://www.din.or.jp/~yamu/img/back.gif"';
+page[3].title = '<FONT SIZE=+3><FONT COLOR="#ff4080">R</FONT><FONT COLOR="ff6090">e</FONT><FONT COLOR="#ff80a0">v</FONT><FONT COLOR="#ffa0b0">e</FONT><FONT COLOR="#ffc0c0">r</FONT><FONT COLOR="#ffe0d0">s</FONT><FONT COLOR="#ffffe0">e</FONT><FONT COLOR="#ffffff"> </FONT><FONT COLOR="#ff4080">N</FONT><FONT COLOR="#ff7098">o</FONT><FONT COLOR="#ffa0b0">i</FONT><FONT COLOR="#ffd0c8">s</FONT><FONT COLOR="#ffffe0">e</FONT></FONT>';
+page[3].title_ext = 'BGCOLOR="#8080f0"';
+page[3].url = 'http://www.din.or.jp/~yamu/';
+page[3].info = '¥µ¥ó¥Ç¡¼¥Í¥Ã¥È¤Ç¤ÎÃÎ¿Í¡£¤ä¤à¤Ã¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¡£X68k¤Ê¿Í¤ÇSFXVI¤Î¥­¥ã¥é¤òºî¤Ã¤¿¤ê¤·¤Æ¤Þ¤¹¡£¡¦¡¦¡¦¤È¤¤¤¦¤Î¤Ï²áµî¤ÎÏÃ¤Ç¡¢ºÇ¶á¤Ç¤Ï¤â¤Ã¤Ñ¤éVisualNovel·Ï¤Ê¿Í¤Ç¤¹¡Ê¾Ð¡Ë¡£ËÜ¿¦¤Ï¥²¡¼¥à¥×¥í¥°¥é¥Þ¡¼¤Ê¤Î¤Ë¸Ä¿Í¥µ¡¼¥¯¥ëºî¤Ã¤Æ¥é¥ß¥Ð¤È¤«Æ±¿Í»ïÇä¤Ã¤Æ¤ëÇÈÆ°CG¿¦¿Í¤ä¤Ã¤Æ¤Þ¤¹¡£Â¿·Ý¤Ê¿Í¤À¡¦¡¦¡¦¡£¥µ¥ó¥Ç¡¼¥Í¥Ã¥È²ñ°÷¤Î¥Û¡¼¥à¥Ú¡¼¥¸°ìÍ÷¤¬¤¢¤ê¤Þ¤¹¡£';
+page[3].link = true;
+page[3].x68 = true;
+page[3].win = true;
+page[3].grp = true;
+page[3].apl = true;
+
+page[4] = new Homepage();
+page[4].banner = '<IMG SRC="../banner/68tengoku.gif" ALT="£¶£¸Å·¹ñ¡¦¥¤¥ó¥¿¡¼¥Í¥Ã¥È½ÐÄ¥½ê" WIDTH=200 HEIGHT=40 BORDER="1">';
+page[4].banner_ext = 'BACKGROUND="../banner/68tengokuBG.jpg"';
+page[4].title = '<FONT COLOR="#f0f000"><FONT SIZE=+1>£¶£¸Å·¹ñ</FONT><BR>¥¤¥ó¥¿¡¼¥Í¥Ã¥È½ÐÄ¥½ê</FONT>';
+page[4].title_ext = 'BGCOLOR="#8080f0"';
+page[4].url = 'http://www.din.or.jp/~nekono/';
+page[4].info = 'Ç­Ìî¤µ¤ó¤Î£¶£¸Å·¹ñ¡¦¥¤¥ó¥¿¡¼¥Í¥Ã¥È½ÐÄ¥½ê¤Ç¤¹¡£ÊØÍø¤Ê¥ê¥ó¥¯½¸¤¬¤¢¤ê¤Þ¤¹¡£¤³¤³¤Î·Ç¼¨ÈÇ¤Ë¤Ï¼ ¡¹»ä¤â½ñ¤­º ¤ß¤·¤Æ¤Þ¤¹(^^)<BR>º£ÅÙtelnetÀÜÂ³¤â»Ï¤á¤¿¤è¤¦¤Ç¤¹¡£';
+page[4].link = true;
+page[4].x68 = true;
+page[4].grp = true;
+
+page[5] = new Homepage();
+page[5].banner = '<IMG SRC="../banner/jsp_bnr.jpg" ALT="¾ëÍÛ¤¹¤¤¡Á¤È¤Ý¤Æ¤È" WIDTH=200 HEIGHT=40 BORDER="1">';
+page[5].banner_ext = 'BGCOLOR="#ffffff"';
+page[5].title = '<TABLE COLS=2><TR><TD><DIV ALIGN=RIGHT><A HREF="http://www.potato.netnet.or.jp/"><FONT SIZE=+5><FONT COLOR="#f0f0f0">J</FONT><FONT COLOR="#c0c0c0">S</FONT><FONT COLOR="#808080">P</FONT></A></DIV></TD><TD><CENTER><FONT COLOR="#ffffff">moter cycle<BR>computer graphics<BR>"PASO-TU-"network</FONT></CENTER></TD></TR></TABLE>';
+page[5].title_ext = 'BGCOLOR="#000000"';
+page[5].url = 'http://www.potato.netnet.or.jp/';
+page[5].info = '¤Í¤ë¤ª¤Õ¤µ¤ó¤Î±¿±Ä¤¹¤ëÁð¤Îº¬BBS¡Ö¾ëÍÛ¤¹¤¤¡Á¤È¤Ý¤Æ¤È¡×¤Î¥ª¥Õ¥£¥·¥ã¥ë¥Ú¡¼¥¸¤Ç¤¹¡£¥Ð¥¤¥¯·Ï¤ÎÏÃÂê¤¬¤¢¤ê¤Þ¤¹¡£<BR>¤½¤·¤Æ¡¢¤Ê¤ó¤È¡ª<FONT COLOR="#5030f0">T\'SoundSystem</FONT>ÂÐ² ¤Î¥Ú¡¼¥¸¤â¤¢¤ê¤Þ¤¹¡ª¡ª';
+page[5].link = true;
+page[5].grp = true;
+page[5].mus = true;
+
+page[6] = new Homepage();
+page[6].banner = '<FONT SIZE=5 COLOR=#000000>Isaki\'s X680x0 Page</FONT>';
+page[6].banner_ext = 'BGCOLOR="#ccffcc"';
+page[6].title = '<FONT SIZE=5 COLOR=#000000>Isaki\'s X680x0 Page</FONT>';
+page[6].url = 'http://www.se.hiroshima-u.ac.jp/~isaki/x68000/';
+page[6].info = '°æºê¤µ¤ó¤Î¥Ú¡¼¥¸¤Ç¤¹¡£MSX¤äX68k¤Ë´Ø¤¹¤ëÏÃÂê¤¬¤¢¤ê¤Þ¤¹¡£¥Æ¥­¥¹¥È¥Ù¡¼¥¹¤Î¥Ö¥é¥¦¥¶¤â¹ÍÎ¸¤·¤¿ºî¤ê¤È¤Ê¤Ã¤Æ¤¤¤ë¤¿¤áLYNX¤ÊX68k¥æ¡¼¥¶¤â°Â¿´(^^)¡£<BR>Z80¥¨¥ß¥å¥ì¡¼¥¿¤ä¥á¡¼¥ë´ØÏ¢¤Î¥½¥Õ¥È¤ò¸ø³«¤·¤Æ¤¤¤Þ¤¹¡£';
+page[6].link = true;
+page[6].x68 = true;
+page[6].dev = true;
+page[6].apl = true;
+
+page[7] = new Homepage();
+page[7].banner = '<IMG SRC="../banner/si_ba0.jpg" ALT="»Í³¤Åß²Æ" WIDTH=200 HEIGHT=40 BORDER="0">';
+page[7].banner_ext = 'BGCOLOR="#ffffff"';
+page[7].title = '<FONT SIZE=+5 COLOR="#303080">»Í³¤Åß²Æ</FONT>';
+page[7].title_ext = 'BGCOLOR="#999920"';
+page[7].url = 'http://www.pluto.dti.ne.jp/~congo/';
+page[7].info = 'àÛä¼ïÀä¼¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸»Í³¤Åß²Æ¤Ç¤¹¡£À±Åð¿ÍNetwork¤¬¤¢¤ê¤Þ¤¹¡£<BR><FONT COLOR="#5030f0">KNJ-Project</FONT>¤Ë¤Æ¶¨ÎÏ¤·¤ÆÄº¤¤¤Æ¤Þ¤¹(^^)¡£<BR>»°¹ñ»Ö¤äÌ¾ºî»ùÆ¸Ê¸³Ø¤Ê¤É¤â¡£<BR>';
+page[7].link = true;
+page[7].x68 = true;
+page[7].dev = true;
+
+page[8] = new Homepage();
+page[8].banner = '<IMG SRC="../banner/beatlife.gif" ALT="THE BEAT LIFE" WIDTH=90 HEIGHT=32 BORDER="0">';
+page[8].banner_ext = 'BGCOLOR="#000000"';
+page[8].title = '<FONT COLOR="#000000">THE BEAT LIFE</FONT>';
+page[8].title_ext = 'BGCOLOR="#c0c0c0"';
+page[8].url = 'http://www01.tcp-ip.or.jp/~minato/';
+page[8].info = '¥¹¥¿¥¸¥ª£Á£Í£Á£Ô£Á¤ÇÂç³èÌö¤Î¥×¥í¥°¥é¥Þ¡¼¡¢Ì«¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¡ÖTHE BEAT LIFE¡×¤Ç¤¹¡£X680x0¾ïÍÑ·×²è¤ä¿©Èñ500±ß¤ÇÀ¸³è¤¹¤ë¤¿¤á¤ÎTIPS¤Ê¤ÉÍ­°ÕµÁ¡Ê¾Ð¡Ë¤Ê¾ðÊó¤¬Ì ºÜ¡ª<BR>¥µ¥ó¥Ç¡¼¥Í¥Ã¥È¤Î¤ªÃç´Ö¤Ç¤¹¡£';
+page[8].link = true;
+page[8].x68 = true;
+page[8].dev = true;
+page[8].apl = true;
+
+page[9] = new Homepage();
+page[9].banner = '<TABLE BORDER=10><TR><TD BGCOLOR=#000000><A HREF="http://hp.vector.co.jp/authors/VA004474/" TARGET=TOP><FONT COLOR=#ff3030 SIZE=6><B><CENTER>¥Õ¥ê¡¼¥½¥Õ¥È¥¦¥§¥¢<BR>¥Õ¥ë¥Ñ¥ï¡¼Á´³«¥Ú¡¼¥¸</CENTER></B></FONT></A></TD></TR></TABLE>';
+page[9].banner_ext = 'BGCOLOR="#ffe0e0"';
+page[9].url = 'http://hp.vector.co.jp/authors/VA004474/';
+page[9].info = 'X680x0³¦¤Ë¤ª¤±¤ë¿ÀÍÍ¤Î¤è¤¦¤Ê¤ªÊý¡£¾®³Þ¸¶ÇîÇ·¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¤Ç¤¹¡£Ko-Window¤Îºî¼Ô¤µ¤Þ¤Ç¡¢<FONT COLOR="#5030f0">KNJ-Project</FONT>¤â¤³¤Î¤ªÊý¤¬¤¢¤Ã¤Æ¤³¤½¡£<BR>¤Þ¤µ¤ËÆ´¤ì¤Î¿Í¤Ç¤¹¡£¤½¤Î³«È¯ÎÏ¤ÏÂ¾¤ÎÄÉ¿ï¤òµö¤·¤Þ¤»¤ó¡£';
+page[9].link = true;
+page[9].x68 = true;
+page[9].win = true;
+page[9].dev = true;
+page[9].apl = true;
+
+page[10] = new Homepage();
+page[10].banner = '<IMG SRC="../banner/rabiddog.png" ALT="Rabid dog" WIDTH=210 HEIGHT=42 BORDER=0>';
+page[10].banner_ext = 'BGCOLOR="#225522"';
+page[10].title = '<H1><FONT COLOR="#ffffff">Rabid dog</FONT></H1>';
+page[10].url='http://www.geocities.co.jp/SiliconValley-PaloAlto/4914/';
+page[10].info = 'Ko-Window·Ï¤Î¥µ¥¤¥È¤Ç¤¹¡£<BR>¤«¤Ê¤êÂ¿¤¯¤Î¥×¥í¥°¥é¥à¤¬ÃÖ¤¤¤Æ¤¢¤ê¤Þ¤¹¡£Ko-Window¥æ¡¼¥¶¡¼¤Ê¤é¤¼¤Ò¥Á¥§¥Ã¥¯¤ò¡£';
+page[10].link = true;
+page[10].x68 = true;
+page[10].apl = true;
+
+page[11] = new Homepage();
+page[11].banner = '<IMG SRC="../banner/utmc.gif" ALT="UTMC" WIDTH=351 HEIGHT=101 BORDER="0">';
+page[11].banner_ext = 'BGCOLOR="#ffffff"';
+page[11].title = '<FONT SIZE=+5 COLOR="#ff0000">£Õ£Ô£Í£Ã</FONT><BR><FONT COLOR="000000"><I>University of Tokyo Microcomputer Club</I></FONT>'
+page[11].url = 'http://www.utmc.or.jp/';
+page[11].info = '»ä¤Î½êÂ°¤¹¤ë¥µ¡¼¥¯¥ë¡¢UTMC¤Î¥Û¡¼¥à¥Ú¡¼¥¸¤Ç¤¹¡£<BR>¤¤¤í¤ó¤Ê¿Í¤¬¤¤¤ë¤È¤³¤í¤Ç¤¹¡£¤¨¤§¡£X11¤Îqvwm¤Îºî¼Ô¤â¼Â¤Ï¤³¤³¤Ë¤¤¤Þ¤¹¡£Â¾¤Ë¤âË¿½ê¤Î¥·¥¹¥ª¥Ú¤È¤«¡¢Ë¿winmdx¤Îºî¼Ô¤È¤«¡£rfc¤ò½ñ¤¤¤Æ¤¤¤ëOB¤Ê¤É¤â¤¤¤¿¤ê¤·¤Þ¤¹¡£¤¦¡Á¤ó¡¢±ü¤¬¿¼¤¤¡£';
+page[11].link = true;
+page[11].x68 = true;
+page[11].win = true;
+page[11].dev = true;
+page[11].apl = true;
+
+page[12] = new Homepage();
+page[12].banner = '<CENTER><H2><I><FONT COLOR="#CCCCCC">¿Ê¤á¡ª</FONT></I></H2><H1><I><FONT COLOR="#FF99FF">·Ý</FONT><FONT COLOR="#66FFFF">Ì´</FONT><FONT COLOR="#66FF99">¾¯</FONT><FONT COLOR="#FFFF99">Ç¯</FONT><FONT COLOR="#FFCC33">¡ª</FONT><FONT COLOR="#FF6666">¡©</FONT></I></H1></CENTER>';
+page[12].banner_ext = 'BGCOLOR="#003300"';
+page[12].url = 'http://www.komaba.utmc.or.jp/susume/';
+page[12].info = '<FONT COLOR="#5030f0">GBDK</FONT>´ØÏ¢¥Ú¡¼¥¸¡£<BR>¥²¡¼¥à¥Ü¡¼¥¤ÍÑ¤ÎÆ±¿Í¥½¥Õ¥È¤ò¥¢¥»¥ó¥Ö¥é¤Çºî¤í¤¦¡ª¤È¤¤¤¦¥Ú¡¼¥¸¤Ç¤¹¡£';
+page[12].link = true;
+page[12].dev = true;
+page[12].apl = true;
+
+page[13] = new Homepage();
+page[13].banner = '<IMG SRC="../banner/xhpcdfb.jpg" ALT="XELF\'s Home Page" WIDTH=194 HEIGHT=32>';
+page[13].banner_ext = 'BGCOLOR="#000000"';
+page[13].url = 'http://www.cyborg.ne.jp/~xelf/';
+page[13].title = '<FONT SIZE=+2 COLOR="#f02020">XELF\'s Home Page</FONT>';
+page[13].title_ext = 'BGCOLOR="#4040c0"';
+page[13].info = '<FONT COLOR="#5030f0">Z-MUSIC</FONT>¤Î¥Ç¡¼¥¿¤òWindows¾å¤ÇºÆÀ¸¤¹¤ë¥×¥í¥°¥é¥à¡¢XMIDI¤ò¸ø³«¤µ¤ì¤Æ¤¤¤Þ¤¹¡£Â¾¤Ë¤â3D¤ÎCG¤ä¤é²»³Ú·Ï¤ÎÏÃÂê¤ä¤é¤ÇË­ÉÙ¤Ê¥Ú¡¼¥¸¤Ç¤¹¡£';
+page[13].x68 = true;
+page[13].win = true;
+page[13],grp = true;
+page[13].mus = true;
+page[13].apl = true;
+
+page[14] = new Homepage();
+page[14].banner = '<FONT SIZE="5"><B><I><FONT COLOR="#FFFFFF">M</FONT><FONT COLOR="#FFEEFF">O</FONT><FONT COLOR="#FFCCFF">K</FONT><FONT COLOR="#FFBBFF">I</FONT><FONT COLOR="#FFAAFF">M</FONT><FONT COLOR="#FF99FF">O</FONT><FONT COLOR="#FF88FF">K</FONT><FONT COLOR="#FF77FF">I</FONT><FONT COLOR="#FF55FF">óî</FONT><FONT COLOR="#FF44FF">Æ£</FONT><FONT COLOR="#FF33FF">»á</FONT><FONT COLOR="#FF22FF">¤Î</FONT><FONT COLOR="#FF00FF">´Û</FONT></I></B></FONT>';
+page[14].banner_ext = 'BACKGROUND="../banner/sharp.jpg"';
+page[14].url = 'http://www.fsinet.or.jp/~mocky/right.htm';
+page[14].title_ext = 'BGCOLOR="#000000"';
+page[14].info = '<FONT COLOR="#5030f0">SCM</FONT>¤Îºî¼Ô¡¢MOKIMOKIóîÆ£»á¤Î´Û¤Ç¤¹¡£¤Ê¤ó¤ÈWindowsÈÇ¤ÎSCM¥×¥ì¥¤¥ä¡¼¤ò¸ø³«¤·¤Æ¤ª¤é¤ì¤Þ¤¹¡£<BR>¤Þ¤¿»á¤ÏMDX¡¢SCM¤Î¥Ç¡¼¥¿ºîÀ®¤Ë¤âÄ¹¤±¤Æ¤ª¤é¤ì¡¢¿ô¡¹¤Î¥Ç¡¼¥¿¤ò¸ø³«¤µ¤ì¤Æ¤¤¤Þ¤¹¡£<BR><FONT COLOR="#5030f0">T\'SoundSystem</FONT>¤Î¥ë¡¼¥Ä¤¬¤³¤³¤Ë¤¢¤ê¤Þ¤¹¡£';
+page[14].x68 = true;
+page[14].win = true;
+page[14].mus = true;
+page[14].apl = true;
+
+page[15] = new Homepage();
+page[15].banner = '<IMG SRC="../banner/macpro.gif" ALT="MacÁÇ¿Í¥×¥í¥°¥é¥Þ¤Î²ñ" WIDTH=88 HEIGHT=31 BORDER="1">';
+page[15].banner_ext = 'BGCOLOR="#ffffff"';
+page[15].url = 'http://home3.highway.ne.jp/~sly/';
+page[15].title = '<TABLE COLS=2><TR><TD><A HREF="http://home3.highway.ne.jp/~sly/"><DIV ALIGN=RIGHT><FONT COLOR="#8080a0" SIZE=+4>Mac</FONT></DIV></A></TD><TD><A HREF="http://home3.highway.ne.jp/~sly/"><DIV ALIGN=RIGHT><FONT SIZE=+2 COLOR="#ff0000">ÁÇ¿Í</FONT><FONT COLOR="#ffffff">¥×¥í¥°¥é¥Þ<BR>¤Î<BR>²ñ</FONT></DIV></A></TD></TR></TABLE>';
+page[15].title_ext = 'BGCOLOR="#000000"';
+page[15].info = 'Macintosh¤Î¥×¥í¥°¥é¥à¥æ¡¼¥¶¡¼¤¬½¸¤¦¥Ú¡¼¥¸¡£ºÇ¶á¤Ç¤ÏRealBasic¤ÎÏÃÂê¤¬Â¿¤¤¤Ç¤·¤ç¤¦¤«¡£Macintosh¤Ç¥×¥í¥°¥é¥à¤ò¤È»×¤¦Êý¤Ê¤é¡¢¤¼¤ÒÆþ²ñ¤ò¡£';
+page[15].mac = true;
+page[15].dev = true;
+page[15].apl = true;
+
+page[16] = new Homepage();
+page[16].banner = '<IMG SRC="../banner/iremlink.gif" ALT="IREM" WIDTH=200 HEIGHT=30 BORDER="1">';
+page[16].banner_ext = 'BGCOLOR="#ffffff"';
+page[16].url = 'http://www.irem.co.jp/';
+page[16].title = '<FONT COLOR="#000000">HOMEPAGE</FONT><FONT SIZE=+4><FONT COLOR="#4060f0">i</FONT><FONT COLOR="#ffffff">rem</FONT></FONT>';
+page[16].title_ext = 'BGCOLOR="#ffcc33"';
+page[16].info = 'R-TYPE¥·¥ê¡¼¥º¤ÎIREM¤Î¥Ú¡¼¥¸¡£¿·ºîDELTA¤ÎÏÃÂê¤äÊÉ»æ¥Ç¡¼¥¿¤¬ÃÖ¤¤¤Æ¤¢¤ë¡ª³«È¯Æüµ­¤â¸«Æ¨¤»¤Ê¤¤¤Ã¤¹¡£<BR>¤â¤¦¡¢¡Ö¤Ê¤Î¤À¤¡¡Á¡×¤Ã¤Æ´¶¤¸¤Ã¤¹¤è¡£';
+page[16].apl = true;
+
+page[17] = new Homepage();
+page[17].banner = '<H1><FONT COLOR="#ffffff">nir\'s home page¡Ê²¾¡Ë</FONT></H1>';
+page[17].banner_ext = 'BGCOLOR="#000000"';
+page[17].url = 'http://www.geocities.co.jp/SiliconValley-PaloAlto/7074/';
+page[17].info = 'X680x0¤Ç¼ÂÍÑ¤ËÂÑ¤¨¤ëÂ®ÅÙ¤ò¤¿¤¿¤­½Ð¤¹¶ÃØ³¤ÎMSX¥¨¥ß¥å¥ì¡¼¥¿¡Öemes.x¡×¤Îºî¼Ô¤µ¤Þ¤Î¥Ú¡¼¥¸<BR>³«È¯¤¬ºÆ³«¤µ¤ì¡¢ºÇ¿·ÈÇ¤¬¸ø³«¤µ¤ì¤Æ¤¤¤Þ¤¹¡£68¤Ç¤â¤Þ¤À¤Þ¤À¥¨¥ß¥å¥ì¡¼¥¿¤Ï´èÄ¥¤ì¤Þ¤¹¤Í¡ª';
+page[17].link = true;
+page[17].x68 = true;
+page[17].dev = true;
+page[17].apl = true;
+
+page[18] = new Homepage();
+page[18].banner = '<H1><P ALIGN="LEFT"><FONT SIZE="2" COLOR="#000040">Akira Gotoh\'s Homepage<BR></FONT><FONT SIZE="6" COLOR="#000040">KITSU-NET</FONT>';
+page[18].banner_ext = 'BGCOLOR="#ffffff"';
+page[18].url = 'http://www2.odn.ne.jp/~foxlum/';
+page[18].info = '¸åÆ£¤¢¤­¤é¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¤Ç¤¹¡£Susie¤ÎPlug-in¤Î°ìÍ÷¤¬¤¢¤ê¤Þ¤¹¡£åºÎï¤Ë¤Þ¤È¤Þ¤Ã¤Æ¤¤¤ë¤Î¤ÇÈó¾ï¤ËÊØÍø¤Ç¤¹¡£²Ã¤¨¤Æ¡¢WindowsÍÑ¤Î²èÁü´ØÏ¢¥½¥Õ¥È¤¬¤¢¤ê¤Þ¤¹¡£';
+page[18].win = true;
+page[18].grp = true;
+page[18].apl = true;
+page[18].link = true;
+
+page[19] = new Homepage();
+page[19].banner = '<H1><I><FONT COLOR="#ffffff">kana\'s Home Page</FONT></I></H1>';
+page[19].banner_ext = 'BGCOLOR="#000000"';
+page[19].url = 'http://www2f.biglobe.ne.jp/~kana/';
+page[19].info = 'Susie´ØÏ¢¤Î¾ðÊó¤È¸À¤¨¤Ð¡¢¤Þ¤º¥³¥³¡£Plug-in¾ðÊó¤ä¤é¡¢³«È¯¤Î¤¿¤á¤Î¥Î¥¦¥Ï¥¦¤Ê¤É¤¬¾Ò²ð¤µ¤ì¤Æ¤¤¤Þ¤¹¡£X680x0¤ÎMO¤òÆÉ¤à¥Ä¡¼¥ë¤È¤«¤â¸ø³«¤µ¤ì¤Æ¤¤¤¿¤ê¤·¤Þ¤¹¡£';
+page[19].x68 = true;
+page[19].win = true;
+page[19].grp = true;
+page[19].dev = true;
+page[19].apl = true;
+page[19].link = true;
+
+page[20] = new Homepage();
+page[20].banner = '<FONT COLOR="#000000">¥Ñ¥éÃËÌµË¡ÃÏÂÓ¡¦GBËÜÉô</FONT>';
+page[20].banner_ext = 'BGCOLOR="#ffffff"';
+page[20].url = 'http://www.freepage.total.co.jp/parawo/';
+page[20].info = '¤Ñ¤é¥ò»á¤Ë¤è¤ë¥Ú¡¼¥¸¡£¼«ºîGameboy¥½¥Õ¥È¡Ö¥¤¡¼¥¢¥ë¥«¥ó¥Õ¡¼¡×¤¬¡ª¡ªÂ¾¤Ë¤â¡¢¥À¥ó¥¹¥ß¥å¡¼¥¸¥Ã¥¯¤Ê¤É¤ò°·¤Ã¤Æ¤¤¤Þ¤¹¡£¤¤¤í¤¤¤í¤ªÀ¤ÏÃ¤Ë¤Ê¤Ã¤Æ¤Þ¤¹¡¢¤¿¤Ö¤ó¡£';
+page[20].mus = true;
+page[20].dev = true;
+page[20].apl = true;
+
+page[21] = new Homepage();
+page[21].banner = '<I><H1><FONT COLOR="#000000">¤À¤À¤¤¤³Æü»ï</FONT></H1><H3><FONT COLOR="#000000">DaDaiko\'s  Diary</FONT></H3></I>';
+page[21].banner_ext = 'BGCOLOR="#ffffff"';
+page[21].url = 'http://ts.red.co.jp/~maeda/';
+page[21].info = '¤Ñ¤é¥ò»á¤È¤È¤â¤ËGameboyÈÇ¡Ö¥¤¡¼¥¢¥ë¥«¥ó¥Õ¡¼¡×¤òºî¤Ã¤¿¡¢¤À¤À¤¤¤³»á¤Î¥Ú¡¼¥¸¤Ç¤¹¡£»á¤Ï¥É¥Ã¥È³¨¤òÃ´Åö¤·¤¿¤½¤¦¤Ç¤¹¡£';
+page[21].grp = true;
+page[21].dev = true;
+page[21].apl = true;
+
+page[22] = new Homepage();
+page[22].banner = '<IMG SRC="../banner/kitt_bun.jpg" BORDER=0>';
+page[22].banner_ext = 'BGCOLOR="#ffffff"';
+page[22].title = '<FONT COLOR="#ffff00">ÈÑÇº</FONT><BR><FONT COLOR="#ff0000"><FONT SIZE=+3>K-</FONT><FONT SIZE=+2>magazine</FONT></FONT>';
+page[22].title_ext = 'BGCOLOR="#8080f0"';
+page[22].url = 'http://www3.tky.3web.ne.jp/~kitt/';
+page[22].info = '¼Â¤Ï¸µ¡¢Æ°²è²°¤µ¤ó¤À¤Ã¤¿KITT¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¤×¤Ë¤ç¡Á¤ó(^^)¡£¥µ¥ó¥Ç¡¼¥Í¥Ã¥È¤Î¤ªÃç´Ö¤Ç¡¢¤¤¤Ä¤â¤ªÀ¤ÏÃ¤Ë¤Ê¤Ã¤Æ¤¤¤ë¤×¤Ë¤ç¤ó¡£¤³¤³¤Ë¤Ï<FONT COLOR="#5030f0">Ìî¿Í¤ÎÐò</FONT>¤È¤¤¤¦Ææ¤ÎÈëÌ©ÁÈ¿¥¤Î¸ø¼°(?)¥Ú¡¼¥¸¤¬¤¢¤ë¤×¤Ë¤ç¤ó¡£¼Â¤Ï»ä¤Î¼Ì¿¿¤âÊ¶¤ìº ¤ó¤Ç¤¤¤ë¤È¤«¤¤¤Ê¤¤¤È¤«¡Ê¾Ð¡Ë¡£';
+page[22].grp = true;
+page[22].link = true;
+
+page[23] = new Homepage();
+page[23].banner = '<IMG SRC="../banner/piyomizu.gif" BORDER=0>';
+page[23].banner_ext = 'BACKGROUND="../banner/kbb.gif"';
+page[23].title = '<H1><FONT COLOR="#000000">¤Ô¤è¤ß¤º¤Î¤³¤Þ¤Ã¤¿¥Û¡¼¥à¥Ú¡¼¥¸</FONT></H1>';
+page[23].title_ext = 'BGCOLOR="#c1c1c1"';
+page[23].url = 'http://super.win.or.jp/~m-miyata/piyomizu/index.html';
+page[23].info = '¥µ¥ó¥Ç¡¼¥Í¥Ã¥È´Ø·¸¤Î¤ªÃÎ¤ê¹ç¤¤¡¢¤Ô¤è¤ß¤º¤µ¤ó¤Î¥Ú¡¼¥¸¤Ç¤¹¡£¥²¡¼¥à´ØÏ¢¤ÎÏÃÂê¤¬Ë­ÉÙ¤Ç¤¹¡£¥·¥ç¡¼¥È¥·¥ç¡¼¥È¤â¤¢¤ê¤Þ¤¹¡£ÌÜ¶Ì¤Ï¤ä¤Ã¤Ñ¤êWindowsÍÑ¥¢¥×¥ê¤Î¤ªºÂ¤ê¥·¥ê¡¼¥º¤Ç¤·¤ç¤¦¤«¡£';
+page[23].grp = true;
+page[23].win = true;
+page[23].apl = true;
+page[23].link = true;
+
+page[24] = new Homepage();
+page[24].banner = '<IMG SRC="../banner/ntake.gif">';
+page[24].banner_ext = 'BGCOLOR="#ffccff"';
+page[24].title = '<H1><B><FONT COLOR="#cc99ff">Æ£²âºÌ±à</FONT></B></H1>';
+page[24].url = 'http://po.jah.ne.jp/~ntake/';
+page[24].info = 'ÅìÂç¥Þ¥¤¥³¥ó¥¯¥é¥Ö¤ÎÂçÀèÇÚ¤Î¥Ú¡¼¥¸¤Ç¤¹¡£¥×¥í¤ÎCG²°¤µ¤ó¤Ç¤¹¡£<BR>Í½Ìó¤ò¤»¤º¤Ë¤à¤Ê¤·¤¯»¶¤Ã¤¿»ä¤Î°Ù¤Ë¶ìÏ«¤·¤ÆCC¤µ¤¯¤é¤ÎLD¤òÁÜ¤·½Ð¤·¤Æ¤¯¤ì¤¿°ÎÂç¤ÊÊý¤Ç¤¹¡£¤¢¡¢´Ø·¸¤Ê¤¤¤«¡¦¡¦¡¦¡£';
+page[24].grp = true;
+page[24].link = true;
+
+page[25] = new Homepage();
+page[25].banner = '<H1>MERA¤µ¤ó¤Î</H1><H1>HoMEPaGE</H1>';
+page[25].banner_ext = 'BACKGROUND="../banner/back13.jpg"';
+page[25].title_ext = 'BGCOLOR="#303030"';
+page[25].url = 'http://www.chamise.ne.jp/mera/index.html';
+page[25].info = '¥á¥é¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¡££³DCG¤ä¥ª¥ê¥¸¥Ê¥ë¶Ê¥Ç¡¼¥¿¤Ê¤É¤¬¤¢¤ê¤Þ¤¹¡£¥×¥í¥°¥é¥Þ¡¼¥º¥ï¡¼¥ë¥É¤Ë¤Æ¡Ö£³£Ä¥×¥í¥°¥é¥ÞÁý¿£·×²è¼Â»ÜÃæ¡×¡¦¡¦¡¦¤Ç¤¹¤è¤Í¡Ê¾Ð¡Ë¡© ';
+page[25].grp = true;
+page[25].mus = true;
+page[25].dev = true;
+page[25].link = true;
+
+page[26] = new Homepage();
+page[26].banner = '<IMG SRC="../banner/maho_bnr.gif">';
+page[26].banner_ext = 'BGCOLOR="#ffffff"';
+page[26].title = '<H1><FONT COLOR="#802020">¤Þ¤Û¤Á¤ã¤ó</FONT><FONT COLOR="#f0c000">¡ù¡¡¡¡</FONT></H1><H1><FONT COLOR="#802020">¡¡¡¡¤Ä¤¦¤·¤ó</FONT></H1>';
+page[26].url = 'http://www.hi-ho.ne.jp/mahochan/';
+page[26].info = '¤Í¤³¤ß¤ß¡õ¤«¤ï¤¤¤¤¤â¤ÎÂç¹¥¤­¢ö¤Þ¤Û¤Á¤ã¤ó¡ù¤Î¥Û¡¼¥à¥Ú¡¼¥¸¤Ç¤¹¡£¤«¤ï¤¤¤é¤·¤¤²èÁü¤¬¤¤¤Ã¤Ñ¤¤¤¢¤ê¤Þ¤¹¡£¤ï¡Á¤¤¡¢¤¿¤³¤ä¤­¤Ç¤¹¤¥¢ö';
+page[26].grp = true;
+page[26].link = true;
+
+page[27] = new Homepage();
+page[27].banner = '<IMG SRC="../banner/nanase_bnr.GIF">';
+page[27].banner_ext = 'BGCOLOR="#ffffff"';
+page[27].title = '<H1><FONT COLOR="#0000ff">¼·À¥Î±Èþ¤Á¤ã¤ó¡¡¡¡</FONT></H1><H1><FONT COLOR="#0000ff">¡¡¡¡Âç¹¥¤­¥Ú¡¼¥¸</FONT></H1>';
+page[27].url = 'http://www.sasami-unet.ocn.ne.jp/aohebi/nanase/';
+page[27].info = '¤Ê¤¡¤ó¤È¡¢¤¢¤ÎÆ£¸¶¤µ¤ó¤¬¼·À¥¤ËÅ¾¤ó¤À¤¡¡Á¡ª¡ª¡Ê¾Ð¡Ë¤ï¡Á¤¤¡¢¤ß¤ó¤Ê¤Ç¥×¥ì¥¹¥ÆÈÇ¤ÎÈ¯Çä¤òÂÔ¤Ä¤ó¤À¡Á¤¤(*^^*)';
+page[27].grp = true;
+page[27].link = true;
+
+page[28] = new Homepage();
+page[28].banner = '<IMG SRC="../banner/rushe!.gif">';
+page[28].banner_ext = 'BGCOLOR="#ffffff"';
+page[28].title = '<H1><I><FONT COLOR="#8080f0">¤ë¡¼¤·¤§¤ß¤å¡¼¤¸¤¢¤à</FONT></I></H1>';
+page[28].url = 'http://www.coara.or.jp/~yoshioh/';
+page[28].info = '¤ª¤ª¤â¤ê¤è¤·¤Ï¤ë¤µ¤ó¤Î¥Û¡¼¥à¥Ú¡¼¥¸¡£»ä¤¬¥³¥ß¥±¤ÇÉ¬¤ºÇã¤¤¤Ë¹Ô¤¯½ê¤Î£±¤Ä¡£¤È¤Æ¤â²¹¤«¤¤³¨¤¬¤¤¤Ã¤Ñ¤¤¤¢¤ê¤Þ¤¹¡£¥Ú¡¼¥¸Á´ÂÎ¤Ë¤âÁ¡ºÙ¤ÊÍ¥¤·¤µ¤¬°î¤ì¤Æ¤¤¤Æ¡¢¤ª´«¤á¤Ç¤¹¡£';
+page[28].grp = true;
+
+page[29] = new Homepage();
+page[29].banner = '<FONT SIZE="+4" COLOR="#FFFF80">£³£´</FONT><FONT SIZE="+3" COLOR="#FFFF80">ÈÖ£Ç£Á£Ô£Å</FONT>';
+page[29].banner_ext = 'BGCOLOR="#000000"';
+page[29].url = 'http://plaza27.mbn.or.jp/~gate34/';
+page[29].info = '¥µ¥ó¥Ç¡¼¥Í¥Ã¥È¤ÎÃÎ¿Í¤Ë¤ÆÌî¿Í¥á¥ó¥Ð¡¼¡¢Cardinal»á¤Î¥Û¡¼¥à¥Ú¡¼¥¸¡£Ìîµå¤Ë´Ø¤¹¤ëÍÍ¡¹¤Ê¾ðÊó¤ò¥á¥¤¥ó¤Ë°·¤Ã¤Æ¤Þ¤¹¡£¥È¥ì¡¼¥Ç¥£¥ó¥°¥«¡¼¥É¤â°·¤Ã¤Æ¤Þ¤¹¡£Ìîµå¹¥¤­¤ÏGO!';
+page[29].link = true;
+
+page[30] = new Homepage();
+page[30].banner = '<FONT SIZE="+4" COLOR="#FFFFFF">YOSSHIN\'S Web Page</FONT>';
+page[30].banner_ext = 'BGCOLOR="#000000"';
+page[30].url = 'http://www2.tky.3web.ne.jp/~yosshin/';
+page[30].info = '»ÔÈÎ¥ì¥Ù¥ë¤òÍÚ¤«¤ËÄ¶¤¨¤¿ÅÁÀâ¤ÎÆ±¿Í¥·¥å¡¼¥Æ¥£¥ó¥°¥²¡¼¥à¡¢Ä¶Ï¢¼Í68k¤òºî¤Ã¤¿¡¢¥Õ¥¡¥ß¥Ù¤Î¤è¤Ã¤·¤ó»á¤Î¥Ú¡¼¥¸¤Ç¤¹¡£³«È¯¼ÔÉ¬¸«¡ªDr.D¤òÄÉ¤¤¤Ä¤á¤¿ÃË¤ÏÎò»Ë¾åÈà°ì¿Í¤Ç¤·¤ç¤¦¡Ê¾Ð¡Ë';
+page[30].link = true;
+page[30].x68 = true;
+page[30].win = true;
+page[30].dev = true;
+
+page[31] = new Homepage();
+page[31].banner = '<IMG SRC="../banner/scbuner.gif">';
+page[31].banner_ext = 'BGCOLOR="#ccddff"';
+page[31].title = '<H1>Secret Casket</H1>';
+page[31].title_ext = 'BGCOLOR="#ddeeff"';
+page[31].url = 'http://webclub.kcom.ne.jp/mb/multi/index.html';
+page[31].info = 'OFF¤Ç¤è¤¯¤ªÀ¤ÏÃ¤Ë¤Ê¤Ã¤Æ¤Þ¤¹¡£»ä¤Î¥Þ¥·¥óÁÈ¤à¤È¤­¤Ë¤â¼êÅÁ¤Ã¤Æ¤â¤é¤Ã¤¿¡¦¡¦¡¦¤È¤¤¤¦¤«¤Þ¤«¤»¤Ã¤­¤ê¤À¤Ã¤¿¤È¤¤¤¦¤«¡¦¡¦¡¦¡£¥Ï¡¼¥É¥¦¥§¥¢¤Ë¤È¤Ã¤Æ¤â¾Ü¤·¤¤¤«¤¿¤Ç¤¹¡£¤·¤«¤·Ç­¡Á¢öÇ­¡Á¢öÇ­¡Á¢ö¤«¤¡¤¤¡Á¢ö(*^_^*)';
+page[31].link = true;
+page[31].grp = true;
+
+page[32] = new Homepage();
+page[32].banner = '<H2><FONT COLOR="#ffffff">·ÝËâ¤Î´Û</FONT></H2><H3><FONT COLOR="#ffffff">- Gamer\'s House -</FONT></H3>';
+page[32].banner_ext = 'BGCOLOR="#000000"';
+page[32].url = 'http://www.asahi-net.or.jp/~ua4s-njm/game.html';
+page[32].info = 'S.NODDY¤µ¤ó¤Ë¤è¤ë¥²¡¼¥à¥Ü¡¼¥¤¤Î¥Ú¡¼¥¸¡£¥ê¥ó¥¯Ãæ¿´¤Î¥Ú¡¼¥¸¤Ç¤¹¤¬¡¢¥²¡¼¥à¾Ò²ð¤«¤éÆ±¿Í¥½¥Õ¥È³«È¯¤Þ¤ÇÉý¹­¤¯¾ðÊó¤¬½¸¤á¤é¤ì¤Æ¤¤¤Þ¤¹¡£';
+page[32].link = true;
+page[32].dev = true;
+
+page[33] = new Homepage();
+page[33].url = 'http://32.97.166.75/run68/';
+page[33].banner = '<FONT SIZE="+3" COLOR="#ff8800">Run68 Support Page</FONT>';
+page[33].banner_ext = 'BGCOLOR="#ffff00"';
+page[33].info = 'X680x0¤Î¥³¥Þ¥ó¥É¥é¥¤¥óÍÑ¥¢¥×¥ê¤òWindows¾å¤ÇÍøÍÑ¤¹¤ë¤¿¤á¤Î¥½¥Õ¥ÈRun68¤Î¥µ¥Ý¡¼¥È¥Ú¡¼¥¸¡£ÊÌÉÜÀ¯ÄÌ¤µ¤ó¤Ë¤è¤ê¥á¥ó¥Æ¥Ê¥ó¥¹¤µ¤ì¤Æ¤¤¤Þ¤¹¡£<FONT COLOR="#5030f0">MCDRV for Windows</FONT>¤Ë¤ÏÉ¬¿Ü¤Ç¤¹¡ª';
+
+/*
+ * --- É¬¿Ü¹àÌÜ ---
+ * banner ... ¥Ð¥Ê¡¼¡Ê²èÁü¤¢¤êÍÑ¡Ë
+ * url ... URL
+ * info ... ²òÀâ
+ * --- ³ÈÄ¥¹àÌÜ ---
+ * banner_ext ... ¥Ð¥Ê¡¼¡Ê²èÁü¤¢¤êÍÑ¡ËÇØ·Ê¿§Áõ¾þetc
+ * title ... ¥Ð¥Ê¡¼¡Ê²èÁü¤Ê¤·ÍÑ¡Ë
+ * title_ext ... ¥Ð¥Ê¡¼¡Ê²èÁü¤Ê¤·ÍÑ¡ËÇØ·Ê¿§Áõ¾þetc
+ * --- ³Æ¼ï¥Õ¥é¥° ---
+ * link ... Áê¸ß¥ê¥ó¥¯
+ * x68 ... X680x0´Ø·¸
+ * win ... Windows´Ø·¸
+ * mac ... Macintosh´Ø·¸
+ * grp ... ²èÁü´Ø·¸
+ * mus ... ²»³Ú´Ø·¸
+ * dev ... ³«È¯´Ø·¸
+ * apl ... ¥½¥Õ¥È´Ø·¸
+ * newpage ... ¿·Ãå
+ */
+
+
+</SCRIPT>
+  </HEAD>
+
+  <BODY BGCOLOR="#c0f0c0">
+  
+  <CENTER>É½¼¨ÊýË¡¡¢¥Õ¥£¥ë¥¿¡¼¤òÀßÄê¤·¤Æ¡¢¡ÖÉ½¼¨¡×¥Ü¥¿¥ó¤ò²¡¤·¤Æ²¼¤µ¤¤</CENTER>
+
+  <TABLE COLS=3 BORDER="5" WIDTH="100%"><TR>
+    <TD WIDTH="85">
+      <CENTER>
+      <IMG SRC="disp.gif" onClick="Display();" onmousedown="Display();">
+      <!-- onClick is for MSIE4, onmousedown is for MOZ4 -->
+      </CENTER>
+    </TD>
+
+    <TD WIDTH="150"><FORM NAME="mode">
+      ÊýË¡:
+      <INPUT TYPE="radio" NAME="method" checked>and
+      <INPUT TYPE="radio" NAME="method">or
+      <BR>
+      ²èÁü:
+      <INPUT TYPE="radio" NAME="banner">¤¢¤ê
+      <INPUT TYPE="radio" NAME="banner" checked>¤Ê¤·
+    </FORM></TD>
+
+    <TD><CENTER><FORM NAME="item">
+      <INPUT TYPE="checkbox" NAME="x68">X68000
+      <INPUT TYPE="checkbox" NAME="win">Windows
+      <INPUT TYPE="checkbox" NAME="mac">Macintosh<BR>
+      <INPUT TYPE="checkbox" NAME="grp">²èÁü
+      <INPUT TYPE="checkbox" NAME="mus">²»³Ú
+      <INPUT TYPE="checkbox" NAME="dev">³«È¯
+      <INPUT TYPE="checkbox" NAME="apl">¥½¥Õ¥È<BR>
+      <INPUT TYPE="checkbox" NAME="allpage" checked>¤¹¤Ù¤Æ
+      <INPUT TYPE="checkbox" NAME="newpage">¿·Ãå
+    </FORM></CENTER></TD>
+  </TR></TABLE>
+  
+  <SCRIPT>
+      // ¤Þ¤ººÇ½é¤ËÉ½¼¨¤¹¤ë
+      Display();
+  </SCRIPT>
+
+
+
+  </BODY>
+</HTML>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             

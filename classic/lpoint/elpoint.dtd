@@ -1,0 +1,73 @@
+<!DOCTYPE elpoint [
+<!ELEMENT elpoint (system,script+)>
+<!ELEMENT system (title?,screen?,start?,font?,path?)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT screen EMPTY>
+<!ELEMENT start EMPTY>
+<!ELEMENT font EMPTY>
+<!ELEMENT path EMPTY>
+<!ELEMENT script (music|sound|text|message|flag|select|graphic|screeneffect|if|goto)*>
+<!ELEMENT music EMPTY>
+<!ELEMENT sound EMPTY>
+<!ELEMENT br EMPTY>
+<!ELEMENT text EMPTY>
+<!ELEMENT message (#PCDATA|br)+>
+<!ELEMENT flag EMPTY>
+<!ELEMENT select (item*)>
+<!ELEMENT item (#PCDATA)>
+<!ELEMENT graphic EMPTY>
+<!ELEMENT screeneffect EMPTY>
+<!ELEMENT if (music|sound|text|message|flag|select|graphic|screeneffect|if|goto)*>
+<!ELEMENT goto EMPTY>
+<!ATTLIST screen
+	width CDATA "640"
+	height CDATA "480">
+<!ATTLIST start
+	id IDREF #IMPLIED
+	name IDREF #IMPLIED>
+<!ATTLIST font
+	size CDATA #IMPLIED
+	name CDATA #IMPLIED>
+<!ATTLIST path
+	base CDATA "./">
+<!ATTLIST script
+	id ID #IMPLIED
+	name ID #IMPLIED>
+<!ATTLIST music
+	type CDATA #IMPLIED
+	src CDATA #IMPLIED
+	reload CDATA "false"
+	loop CDATA "true">
+<!ATTLIST sound
+	type CDATA #IMPLIED
+	src CDATA #IMPLIED
+	reload CDATA "false"
+	loop CDATA "true">
+<!ATTLIST text
+	hide CDATA "false">
+<!ATTLIST flag
+	id CDATA #IMPLIED
+	name CDATA #IMPLIED
+	state CDATA "true">
+<!ATTLIST item
+	id IDREF #IMPLIED
+	name IDREF #IMPLIED>
+<!ATTLIST graphic
+	id CDATA "1"
+	type CDATA #IMPLIED
+	src CDATA #IMPLIED
+	x CDATA "0"
+	y CDATA "0"
+	width CDATA #IMPLIED
+	height CDATA #IMPLIED>
+<!ATTLIST screeneffect
+	type CDATA #REQUIRED
+	color CDATA "#000000">
+<!ATTLIST if
+	id CDATA #IMPLIED
+	name CDATA #IMPLIED
+	state CDATA "true">
+<!ATTLIST goto
+	id CDATA #IMPLIED
+	name CDATA #IMPLIED>
+]>

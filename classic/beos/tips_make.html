@@ -1,0 +1,68 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888">
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■GNU makeで並列コンパイル ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">GNU makeで並列コンパイル</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			デュアルな人でIDEを使っている人は、標準設定でCPUの数と同じ並列数でコンパイルするようになっているので当たり前のようにに並列コンパイルを活用していると思います。が、コマンドラインでもCPUを無駄なく使うことはできないでしょうか。実はできます。余裕でできます。標準添付されているmakeはGNU make 3.77なのですが、このGNU makeには「-j」というオプションがあります。
+			<br>&nbsp;
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">$ make --help
+Usage: make [options] [target] ...
+Options:
+  -b, -m                      Ignored for compatibility.
+  -C DIRECTORY, --directory=DIRECTORY
+                              Change to DIRECTORY before doing anything.
+  -d, --debug                 Print lots of debugging information.
+  -e, --environment-overrides
+                              Environment variables override makefiles.
+  -f FILE, --file=FILE, --makefile=FILE
+                              Read FILE as a makefile.
+  -h, --help                  Print this message and exit.
+  -i, --ignore-errors         Ignore errors from commands.
+  -I DIRECTORY, --include-dir=DIRECTORY
+                              Search DIRECTORY for included makefiles.
+<font color="#ff0000">  -j [N], --jobs[=N]          Allow N jobs at once; infinite jobs with no arg.</font>
+  -k, --keep-going            Keep going when some targets can't be made.
+  -l [N], --load-average[=N], --max-load[=N]
+                              Don't start multiple jobs unless load is below N.
+  -n, --just-print, --dry-run, --recon
+                              Don't actually run any commands; just print them.
+  -o FILE, --old-file=FILE, --assume-old=FILE
+                              Consider FILE to be very old and don't remake it.
+  -p, --print-data-base       Print make's internal database.
+  -q, --question              Run no commands; exit status says if up to date.
+  -r, --no-builtin-rules      Disable the built-in implicit rules.
+  -s, --silent, --quiet       Don't echo commands.
+  -S, --no-keep-going, --stop
+                              Turns off -k.
+  -t, --touch                 Touch targets instead of remaking them.
+  -v, --version               Print the version number of make and exit.
+  -w, --print-directory       Print the current directory.
+  --no-print-directory        Turn off -w, even if it was turned on implicitly.
+  -W FILE, --what-if=FILE, --new-file=FILE, --assume-new=FILE
+                              Consider FILE to be infinitely new.
+  --warn-undefined-variables  Warn when an undefined variable is referenced.</font></pre></td></tr></table></div>
+			<p>&nbsp;
+			ってことで、実はこのオプションを付けてやれば、makeが並列可能と認識できる処理ならば並列にコンパイルしてくれます。単に「-j」とすると、可能な限り並列に処理します。2つ以上は並列にしなくてよろしいって場合には「-j 2」ってしてやれば2つ以上は同時に処理しません。ただし「<font color="#ff8888">makeが並列可能と認識できる処理</font>」というのが実は曲者で、IDEを使っている時ほどの効果は得られない、というのが現実です。識者の話ですと、依存の木が綺麗に分かれてるような場合じゃないと駄目なんだそうで。例えば、sample-codeに含まれるmakefile.allなんかだと、どばーっと並列コンパイルしてくれるんですが、cvsのコンパイルなんかはまったく効果なしでした。思わず「<font color="#ff8888">なんだ、ストールマン、たいしたことないじゃん</font>」とか口走ったら、「<font color="#ff8888">makeは単純なプログラムで、時刻しか情報として使わないから理論的にはこれが限界なんだよ！</font>」と無精ヒゲのヒト（not ストールマン）に怒られてしまいました。そんなもんなのか。まぁ、とりあえずalias make='make -j'なんてしとけば良いんではないでしょうか。
+			<p>&nbsp;
+			その後、<a href="http://www.be-in.org/~yun/">ゆん</a>さんにcvsで効果がないのはmakeが入れ子になってるからでは？と指摘され、調べてみると確かにそんな感じ。で、この対策ですが、MAKEFLAGSを設定しておくというのが正解のようです（これもゆんさんに教えてもらった）。<font color="#ff8888">export MAKEFLAGS='-j 3'</font>などとしましょう（数値はCPUの数+1くらいが良いそうです）。ってことで、ゆんさん、ありがとうございます。
+			<p>&nbsp;
+			追記。ファイル間の依存関係がきちんと記述されていないと並列makeは失敗することもあるそうです。
+		</blockquote>
+		<div align="center"><a href="./index.html">すげーぜ！</a></div>
+		<hr width="80%">
+		<div align="center"><a href="../main.html"><img src="../banner/psbanner.jpg" width="200" height="40" border="0"></a></div>
+		&nbsp;<br>
+		<div align="right">CVS 最終更新 ---- $Id: tips_make.html,v 1.4 2000/07/19 11:31:51 toyoshim Exp $</div>
+	</body>
+</html>

@@ -1,0 +1,213 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS, DOS, Emulator, VM, Develop">
+		<title>Dos eXecution environment for BeOS / POSIX</title>
+	</head>
+
+	<body bgcolor="#336699" text="#000000" link="#ff0000" vlink="#ff0000">
+
+		<table border="0" cellpadding="1" cellspacing="0" bgcolor="#ffff88"><tr><td>
+			<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffcc44"><tr>
+				<th>&nbsp;&nbsp;&nbsp;&nbsp;MuTerm (p1) [UTF-8]&nbsp;&nbsp;</th>
+			</tr></table>
+		</td></tr></table>
+
+		<table border="0" cellpadding="1" cellspacing="0" bgcolor="#aaaaaa"><tr><td>
+			<table border="0" cellpadding="1" cellspacing="0" bgcolor="#ffffff" width="100%"><tr><td>
+				<table border="0" cellpadding="1" cellspacing="0" bgcolor="#aaaaaa" width="100%"><tr><td>
+					<table border="0" cellpadding="1" cellspacing="0" bgcolor="#ffffff" width="100%"><tr><td>
+
+						<table border="0" cellpadding="0" cellspacing="0" bgcolor="#f8f8ff" width="100%"><tr><td>&nbsp;ターミナル&nbsp;&nbsp;編集&nbsp;&nbsp;文字コード&nbsp;&nbsp;ヘルプ</td></tr></table>
+
+						<table border="0" cellpadding="1" cellspacing="0" bgcolor="#aaaaaa" width="100%"><tr><td></td></tr></table>
+
+						<table border="0" cellpadding="0" cellspacing="0" bgcolor="#000000" width="100%"><tr><td><code><font color="#ffffff">
+<pre>Dos eXecution environment for BeOS / POSIX [$Date: 2000/09/29 18:31:25 $]
+(C) Copyright 2000 Toyoshima-House
+
+<!--
+	/// NEW ///
+-->
+C:\>new
+ 2000/09/30 ... LSI-Cが動作するようになりました。
+                また、ソースをCVSで取得できるようにしました。
+ 2000/08/19 ... ページ立ち上げ。
+
+<!--
+	/// PURPOSE ///
+-->
+C:\>purpose
+
+ このプロジェクトの目的は、BeOSのTerminal下でシームレスに
+ DOSのコンソールベースのアプリケーションを実行することにあります。
+ 最終的にはexecve互換のdos_execveといった形でライブラリ化し、
+ shellに簡単なパッチを当てることでBeOSネイティブなコマンドと
+ 区別することなくDOSコマンドを実行できるようにします。
+ 今のところ16bitのコマンドをターゲットにしています。
+
+<!--
+	/// ROADMAP ///
+-->
+C:\>roadmap
+
+ EXEファイルを起動 ... [<font color="#00ff00"> OK </font>]
+ 簡単なコマンドの実行 ... [<font color="#00ff00"> OK </font>]
+ LSI-Cを完全動作させる ... [<font color="#00ff00"> OK </font>]
+ WonderWitch開発環境の完全動作 ... [<font color="#00ff00"> OK?</font>]
+ （以下、随時追加...）
+
+<!--
+	/// SCREENSHOT ///
+-->
+C:\>screenshot
+
+ 実際に動作中のスクリーンショットです。
+ 
+2000/08/02  12:02               50,886 <a href="dx01.jpg">dx01.jpg</a><font color="#ffffff">
+2000/08/03  18:18               45,335 <a href="dx02.jpg">dx02.jpg</a><font color="#ffffff">
+2000/09/30  03:22              261,327 <a href="dx03.jpg">dx03.jpg</a><font color="#ffffff">
+               3 個のファイル
+               0 個のディレクトリ
+
+<!--
+	/// IMPLEMENT	///
+-->
+C:\>implement
+
+ 実装は次のような方法を取っています。
+
+ 外部仕様 ... 「dx」という名前の実行ファイルとして実装され、引数に
+	実行するDOSコマンド名、そしてその引数をとります。
+ 
+ CPU ... エミュレーション。VMのほうが効率の面では有利ですが、
+	BeOSで実現が困難かつ私自身の知識不足のため、この手法を取りました。
+	結果としてPPCでも動作可能と思われます。CPUエミュレーション部分は
+	MAMEに採用されているFabrice Frances氏のコードを元にしています。
+
+ DOS CALL ... 割り込みベクタの飛び先に$0F, $XX, $CFといったシーケンスを用意し
+	CPUエミュレータ部分で$0Fを実行しようとしたら、各割り込み処理を実装した
+	コールバック関数を引数$XXで呼び出すようにしています。
+	内部はネイティブコードで記述し、必要に応じてCPUエミュレータ内部の
+	レジスタやフラグを書き換えます。
+
+ 環境変数 ... BeOS側の環境変数を元に環境ブロックを生成し、
+	DOSプログラムに渡しています。
+	この際、DX_xxxという名前の環境変数が存在した場合には、
+	xxxの替りにDX_xxxの内容がxxxとして渡されるようにしています。
+	PATHに関しては、ディレクトリの区切り文字を「/」から「\」へ、
+	パスの区切り文字を「:」から「;」へ変換して渡します。
+
+ 引数 ... dxに渡される2つ目移行の引数を元にPSPの80h以降の情報を生成して
+	DOSプログラムに渡しています。DOS側の制限で255バイト以上の長さの引数は
+	渡すことができません。
+
+ ファイル ... 記述子0、1、2はそれぞれBeOS側のSTDIN、STDOUT、STDERR
+	に結びつけられます。今のところテキストモードの処理は考えずに実装しています。
+	また、ファイル名についてはcase insensitiveで処理できるようにしています。
+	長い名前についてもDOSコマンド側の実装で可能な限り対応します。また、引数に
+	含まれるファイル名については、内部的に「短い名前」⇔「長い名前」の対応表を作り、
+	対処してみる予定です。
+
+<!--
+	/// CVS ///
+-->
+C:\>cvs
+
+ 最新版のソースをcvs経由で取得できるようになりました。
+ :pserver:anonymous@misuzu.p.utmc.or.jp://CHIYO/cvsroot、
+ モジュール名はdxです。以下の手順でアクセスできます。
+ パスワードはありませんので、プロンプトが出たら改行を押して下さい。
+
+C:\>cvs -d :pserver:anonymous@misuzu.p.utmc.or.jp://CHIYO/cvsroot login
+(Logging in to anonymous@misuzu.p.utmc.or.jp)
+CVS password:
+C:\>cvs -d :pserver:anonumous@misuzu.p.utmc.or.jp://CHIYO/cvsroot co dx
+
+ サーバーはフレッツISDNでインターネットに接続しているため、場合によっては
+ アクセスできない事があるかもしれません（名前はDynamic DNSで参照できるように
+ なっています）。pserverはversion 1.11の改良版をWindows 2000上で動かしています。
+ 現在updateで差分更新に失敗するという問題があります。該当ファイルを削除した上で
+ 再度updateをすると問題を回避できます（直さねば・・・）。
+
+<!--
+	/// STATUS ///
+-->
+C:\>status
+
+ LSI-Cが動作するようになりました。今のところ、WonderWitch付属のhelloのサンプル
+ が一通り問題なくmakeできることが確認されています。
+
+<!--
+	/// DEVELOP ///
+-->
+C:\>develop
+
+ プログラムはCで書かれています。なぜC++でないかというと、...解りません...
+ たまたまCで書き始めてしまったためにCになってます。
+ 
+ ソースファイルを取得したら、「$ tar zxvf dx-20000809.tar.gz」などとして展開して下さい。
+ dx/ 以下にソースが展開されます。このまま「$ make」すれば、実行ファイルdxが生成されます。
+ また、「$ env DEBUG=1 make」とすれば、デバッグ版のdx_debugが生成されます。
+ デバッグ版は内部に簡単なデバッガを内蔵している他、DOS CALLのトレースを表示します。
+
+ 簡単なソースの解説をしておきます。
+
+ debug.c ... デバッガの実装です。
+ dos.h ... DOSに関する構造体を定義しています。 
+ file.c ... ファイル入出力周りを実装しています。
+ i86/ ... 80286 CPU エミュレータ関係が含まれます。
+ i86info.h ... CPU情報にアクセスするために必要な構造体を定義しています。
+ int.c ... INT割り込みが発生した際にコールバックとして呼ばれます。
+ int1a.c ... INT 1A周りを実装しています。int.cから呼ばれます。
+ int21.c ... INT 21周りを実装しています。int.cから呼ばれます。
+ int21_43.c ... INT 21 (AH = 43h)周りを実装しています。int21.cから呼ばれます。
+ int21_44.c ... INT 21 (AH = 44h)周りを実装しています。int21.cから呼ばれます。
+ mame_inc ... i86/ 以下のコンパイルに必要になるMAMEのヘッダが入っています。
+ memory.c ... CPUからのメモリアクセス部分、およびメモリ管理を実装しています。
+ process.c ... EXEファイルの読み込みやプロセスに係る部分を実装しています。
+
+<!--
+	/// REFERENCE ///
+-->
+C:\>reference
+
+ 開発資料として以下のものを参考にしています。
+ 
+ doscmd ... *BSD用のDOSコマンド実行環境。ことの発端とも言う。
+ </font><a href="http://hp.vector.co.jp/authors/VA000124/assembler2/assembler10.html">MS-DOSの世界</a><font color="#ffffff"> ... ecb.さんの「目指せプログラマー！」内にあるコーナー。
+	私、MS-DOSで開発したことなかったんで、とても参考になりました。
+ </font><a href="http://lrs.fmi.uni-passau.de/support/doc/interrupt-57/INT.HTM">Interrupt Jump Table</a><font color="#ffffff"> ... INT周りについての詳細な資料があります。
+	ここの資料を元に実装しています。
+
+<!--
+	/// MEMBERS ///
+-->
+C:\>members
+
+ 開発に関係してる人達です。勝手に巻き込んだ（と思ってる）人とか、
+ アドバイザーとか、巻き込む予定の人とかも（ぉぃ。
+
+ </font><a href="http://www.tk.xaxon.ne.jp/~toyoshim/">とよしま</a><font color="#ffffff"> ... 言い出しっぺ。
+ </font><a href="http://www.be-in.org/~mas/">Masashi Sawada</a><font color="#ffffff"> ... 巻き込まれた人その１。
+ </font><a href="http://www.wickedbeat.com/">内藤(暴威)</a><font color="#ffffff"> ... 巻き込まれた人その２。
+ </font><a href="http://hp.vector.co.jp/authors/VA001240/">伊藤隆幸</a><font color="#ffffff"> ... アドバイザー。
+ </font><a href="http://www.qubeley.com/kakky/">かっき～</a><font color="#ffffff"> ... もう逃げられません（笑）。
+
+<!--
+	/// CONTACT ///
+-->
+C:\>contact
+
+ 何かありましたら、</font><a href="mailto:toyoshim@be-in.org">とよしま</a><font color="#ffffff">までお願いします。
+ IRCの方で、#Be日本に常駐しているので、そちら経由でもOKです（たぶん）。
+</font></pre>
+						</font></code></td></tr></table>					
+					</td></tr></table>
+				</td></tr></table>
+			</td></tr></table>
+		</td></tr></table>
+		<blockquote><div align="right">$Id: index.html,v 1.10 2000/09/29 18:31:25 toyoshim Exp $</div></blockquote>
+	</body>
+</html>

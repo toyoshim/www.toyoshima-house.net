@@ -1,0 +1,19 @@
+*** gcc/Makefile.orig	Wed Apr  3 01:57:50 2002
+--- gcc/Makefile	Wed Apr 10 03:19:45 2002
+***************
+*** 415,421 ****
+  LIBGCC2_INCLUDES =
+  
+  # Additional target-dependent options for compiling libgcc2.a.
+! TARGET_LIBGCC2_CFLAGS =
+  
+  # Additional sources to handle exceptions; overridden on ia64.
+  LIB2ADDEH = $(srcdir)/unwind-dw2.c $(srcdir)/unwind-dw2-fde.c \
+--- 415,421 ----
+  LIBGCC2_INCLUDES =
+  
+  # Additional target-dependent options for compiling libgcc2.a.
+! TARGET_LIBGCC2_CFLAGS = -EL
+  
+  # Additional sources to handle exceptions; overridden on ia64.
+  LIB2ADDEH = $(srcdir)/unwind-dw2.c $(srcdir)/unwind-dw2-fde.c \

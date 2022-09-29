@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN"
+"http://www.w3.org/TR/REC-html40/strict.dtd">
+<html>
+ <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="Author" content="TOYOSHIMA Takashi" />
+  <link rel="stylesheet" href="/common.css" />
+  <title>TOYOSHIMA HOUSE - UNIX</title>
+  <script language="JavaScript">
+   document.cookie = "to_en=";
+   document.cookie = "to_ja=";
+  </script>
+  <script language="JavaScript" src="/menu.js"></script>
+ </head>
+ <body>
+  <h1>UNIX</h1>
+
+  <h2>mindfocus</h2>
+  <p>X Window System用のデスクトップマスコット（ウィンドウシッター）「mindfocus」のページは<a href="/classic/mf/">こちら</a>にあります。</p>
+
+  <h2>UPnP on NetBSD</h2>
+  <p>Linux IGDを用いてNetBSDマシンをUPnP対応ルータにする方法のメモです。</p>
+
+  <h3>ライブラリ・ソフトウェアのインストール</h3>
+  <h4>pthread</h4>
+  <p>Linux IGDはPOSIX Threadを用いるので、なんらかのPOSIX Threadの実装が必要になります。今回はパッケージにもなっていてインストールが簡単なgnu pthreadを使いました。</p>
+  <pre class="shell">
+  % cd /usr/pkgsrc/devel/pth
+  % sudo make install</pre>
+  <p>だいたいこんな感じです。pkgがよくわからないって人はどこかで勉強しましょう:)</p>
+
+  <h4>uuid</h4>
+  <p>このライブラリはext2fs関係のソフトウェアの一部として入手できます。後から調べたら、これもpkgでインストール可能でした（pkg/sysutils/e2fsprogs）が、ここでは自力で/usr/localにインストールします。</p>
+  <p>まずは<a href="http://e2fsprogs.sourceforge.net/">e2fsprogsのサイト</a>からe2fsprogs-1.35.tar.gzを入手します。</p>
+  <pre class="shell">
+  % cd $work
+  % tar zxvf $archive/e2fsprogs-1.35.tar.gz
+  % cd e2fsprogs-1.35
+  % ./configure
+  % cd lib/uuid
+  % make
+  % sudo make install</pre>
+  <p>configureをトップからかけて、ここではuuidだけをコンパイル・インストールしています。ひょっとしたら全体でコンパイルが通るのかもしれませんが、今回はuuidだけが必要だったので試してません。</p>
+
+  <h4>Linux SDK for UPnP Devices (libupnp)</h4>
+  <p>UPnP周りの実装がなされたライブラリです。IBM製のコードがベースになっているようですが、ソースはあまり綺麗じゃありません。バージョン毎にAPIが結構違うようで、下記のLinux IGDがこちらのバージョンを選びますので、最新が欲しいという気持を抑えて、とりあえず1.0.4を取ってきましょう。サイトのほうは<a href="http://upnp.sourceforge.net/">こちら</a>になります。
+  <p>また、このライブラリはPOSIX Threadを必要としますので、上記のgnu pthreadに合わせるためにMakefileをガリガリ書き換える必要があります。サブディレクトリのmakeに変数引き継いでくれないし、この辺がダサいです。</p>
+  <p>まぁ、文句言っても仕方ないのでパッチをまとめてありますので、<a href="netbsd-upnp/upnpsdk-1.0.4.nb.diff">これ</a>を使ってみてください。</p>
+  <pre class="shell">
+  % cd $work
+  % tar zxvf $archive/upnpsdk-1.0.4.tar.gz
+  % cd upnpsdk-1.0.4
+  % patch -p1 &lt; $archive/upnpsdk-1.0.4.nb.diff
+  % make
+  % sudo make install</pre>
+  <p>インストール後には/usr/local/lib/libupnp.soや/usr/local/include/upnpができます。</p>
+
+  <h4>Linux UPnP Internet Gateway Device (Linux IGD)</h4>
+  <p>最後の本体になります。<a href="http://linux-igd.sourceforge.net/">こちら</a>からlinuxigd-0.92.tgzを入手しましょう。これも<a href="netbsd-upnp/linux-igd.nb.diff">パッチ</a>を用意しました。当初は内部で呼びだしているiptablesをシェルスクリプトでフックしていたんですが、今回はFreeBSDでの実装を参考に内部で直接ipfを呼び出すように修正しました。</p>
+  <pre class="shell">
+  % cd $work
+  % tar zxvf $archive/linuxigd-0.92.tgz
+  % cd linux-igd
+  % patch -p1 &lt; $archive/linux-igd.nb.diff
+  % make
+  % sudo make install</pre>
+  <p>/usr/local/etc/linuxigdに設定ファイル、/usr/local/bin/upnpdにdaemon本体ができます。</p>
+
+  <h3>動作テスト</h3>
+  <h4>起動</h4>
+  <pre class="shell">
+  % sudo /sbin/route add -net 239.0.0.0 -netmask 255.0.0.0 &lt;int addr&gt;
+  % sudo /usr/local/bin/upnpd &lt;ext if&gt; &lt;int if&gt;</pre>
+  <p>&lt;int addr&gt;,&lt;int if&gt;,&lt;ext if&gt;については、それぞれイントラ側のアドレス、インターフェース、インターネット側のインターフェースを各自の環境に合わせて指定します。うちの場合だとこんな感じになります。
+  <pre class="shell">
+  % sudo /sbin/route add -net 239.0.0.0 -netmask 255.0.0.0 192.168.12.1
+  % sudo /usr/local/bin/upnpd pppoe0 rtk0</pre>
+  <h4>確認</h4>
+  <p>イントラ内のクライアントマシンからLinux IGDデバイスが見えるか確認します。UPnPに対応したWindows XPの場合には、ネットワーク接続内に「Linux IGD 上の Local Area Connection」というアイコンが現われます。</p>
+  <div class="center"><img src="netbsd-upnp/igd00.jpg"></div><br>
+  <p><img align="left" src="netbsd-upnp/igd01.jpg">
+  アイコンを開くと左図のようなダイアログが現われます。</p>
+  <br clear="all"><br>
+  <p><img align="right" src="netbsd-upnp/igd02.jpg">
+  プロパティの内容はこんな感じです。</p>
+  <br clear="all"><br>
+  <p><img align="left" src="netbsd-upnp/igd03.jpg">
+  設定の中身はこのようになっています。うちの場合はIP電話が接続されているのでこのように3つの項目が出ていますが、何も接続していなければ当然何も表示されないはずです。</p>
+  <br clear="all"><br>
+  <p><img align="right" src="netbsd-upnp/igd04.jpg">
+  現状、UPnPの動作確認に使えるアプリケーションと言えばWindows MessengerまたはMSN Messengerになると思います。接続情報でこのような表示になっていれば勝利です。</p>
+  <br clear="all"><br>
+
+  <h3>設定</h3>
+  <p>ここまで動作すれば、あとは自動起動するようにrc.localに記述するだけです。うちでは次のような行を追加しています。</p>
+  <pre class="source">
+  if [ -x /usr/local/bin/upnpd ]; then
+      echo -n 'starting linuxigd (UPnP daemon):'
+      /sbin/route add -net 239.0.0.0 -netmask 255.0.0.0 192.168.12.1
+      /usr/local/bin/upnpd pppoe0 rtk0
+      echo '.'
+  fi</pre>
+
+  <h3>関連サイト</h3>
+  <ul>
+  <li><a href="http://www.ossp.org/pkg/lib/pth/">OSSP: GNU pth</a>
+  <li><a href="http://e2fsprogs.sourceforge.net/">E2fsprogs: Ext2 Filesystem Utilityes</a>
+  <li><a href="http://upnp.sourceforge.net/">Linux SDK for UPnP Devices</a>
+  <li><a href="http://linux-igd.sourceforge.net/">Linux UPnP Internet Gateway Device</a>
+  </ul>
+  <hr class="footer" />
+  <div class="id">$Id: index_ja.html,v 1.3 2004/05/03 00:19:13 toyoshim Exp $</div>
+ </body>
+</html>

@@ -1,0 +1,123 @@
+*** specs.orig	Sat Apr  6 11:54:21 2002
+--- specs	Sat Apr  6 14:10:20 2002
+***************
+*** 13,28 ****
+   as %(asm_options) %{!pipe:%g.s} %A }
+  
+  *cpp:
+! %{.cc:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.cxx:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.C:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.m:	-D__LANGUAGE_OBJECTIVE_C -D_LANGUAGE_OBJECTIVE_C -D__LANGUAGE_C -D_LANGUAGE_C} %{.S:	-D__LANGUAGE_ASSEMBLY -D_LANGUAGE_ASSEMBLY %{!ansi:-DLANGUAGE_ASSEMBLY}} %{.s:	-D__LANGUAGE_ASSEMBLY -D_LANGUAGE_ASSEMBLY %{!ansi:-DLANGUAGE_ASSEMBLY}} %{!.S: %{!.s: %{!.cc: %{!.cxx: %{!.C: %{!.m: -D__LANGUAGE_C -D_LANGUAGE_C %{!ansi:-DLANGUAGE_C}}}}}}} %(subtarget_cpp_size_spec) %{mips3:-U__mips -D__mips=3 -D__mips64} %{mips4:-U__mips -D__mips=4 -D__mips64} %{mgp32:-U__mips64} %{mgp64:-D__mips64} %{msingle-float:%{!msoft-float:-D__mips_single_float}} %{m4650:%{!msoft-float:-D__mips_single_float}} %{msoft-float:-D__mips_soft_float} %{mabi=eabi:-D__mips_eabi} %{mips16:%{!mno-mips16:-D__mips16}} %{EB:-UMIPSEL -U_MIPSEL -U__MIPSEL -U__MIPSEL__ -D_MIPSEB -D__MIPSEB -D__MIPSEB__ %{!ansi:-DMIPSEB}} %{EL:-UMIPSEB -U_MIPSEB -U__MIPSEB -U__MIPSEB__ -D_MIPSEL -D__MIPSEL -D__MIPSEL__ %{!ansi:-DMIPSEL}} %(long_max_spec) %(subtarget_cpp_spec) 
+  
+  *cpp_options:
+! %{C:%{!E:%eGNU C does not support -C without using -E}} %{std*} %{nostdinc*} %{C} %{v} %{I*} %{P} %{$} %I %{MD:-M -MF %W{!o: %b.d}%W{o*:%.d%*}} %{MMD:-MM -MF %W{!o: %b.d}%W{o*:%.d%*}} %{M} %{MM} %W{MF*} %{MG} %{MP} %{MQ*} %{MT*} %{M|MD|MM|MMD:%{o*:-MQ %*}} %{!no-gcc:-D__GNUC__=%v1 -D__GNUC_MINOR__=%v2 -D__GNUC_PATCHLEVEL__=%v3} %{!undef:%{!ansi:%{!std=*:%p}%{std=gnu*:%p}} %P} %{trigraphs} %c %{Os:-D__OPTIMIZE_SIZE__} %{O*:%{!O0:-D__OPTIMIZE__}} %{fno-inline|O0|!O*:-D__NO_INLINE__} %{ffast-math:-D__FAST_MATH__} %{fshort-wchar:-U__WCHAR_TYPE__ -D__WCHAR_TYPE__=short\ unsigned\ int} %{ffreestanding:-D__STDC_HOSTED__=0} %{fno-hosted:-D__STDC_HOSTED__=0} %{!ffreestanding:%{!fno-hosted:-D__STDC_HOSTED__=1}} %{fshow-column} %{fno-show-column} %{fleading-underscore} %{fno-leading-underscore} %{fno-operator-names} %{ftabstop=*} %{remap} %{g3:-dD} %{W*} %{w} %{pedantic*} %{H} %{d*} %C %{D*&U*&A*} %{i*} %Z %i %{E:%{!M*:%W{o*}}}
+  
+  *trad_capable_cpp:
+  %{traditional|ftraditional|traditional-cpp:trad}cpp0
+  
+  *cc1:
+! %{gline:%{!g:%{!g0:%{!g1:%{!g2: -g1}}}}} %{mips1:-mfp32 -mgp32} %{mips2:-mfp32 -mgp32}%{mips3:%{!msingle-float:%{!m4650:-mfp64}} -mgp64} %{mips4:%{!msingle-float:%{!m4650:-mfp64}} -mgp64} %{mfp64:%{msingle-float:%emay not use both -mfp64 and -msingle-float}} %{mfp64:%{m4650:%emay not use both -mfp64 and -m4650}} %{mint64|mlong64|mlong32:-mexplicit-type-size }%{m4650:-mcpu=r4650} %{m3900:-mips1 -mcpu=r3900 -mfp32 -mgp32} %{G*} %{EB:-meb} %{EL:-mel} %{EB:%{EL:%emay not use both -EB and -EL}} %{pic-none:   -mno-half-pic} %{pic-lib:    -mhalf-pic} %{pic-extern: -mhalf-pic} %{pic-calls:  -mhalf-pic} %{save-temps: } %(subtarget_cc1_spec) 
+  
+  *cc1_options:
+  %{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}} %1 %{!Q:-quiet} -dumpbase %B %{d*} %{m*} %{a*} %{g*} %{O*} %{W*} %{w} %{pedantic*} %{std*} %{ansi} %{traditional} %{v:-version} %{pg:-p} %{p} %{f*} %{Qn:-fno-ident} %{--help:--help} %{--target-help:--target-help} %{!fsyntax-only:%{S:%W{o*}%{!o*:-o %b.s}}} %{fsyntax-only:-o %j} %{-param*}
+--- 13,28 ----
+   as %(asm_options) %{!pipe:%g.s} %A }
+  
+  *cpp:
+! %{.cc:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.cxx:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.C:	-D__LANGUAGE_C_PLUS_PLUS -D_LANGUAGE_C_PLUS_PLUS} %{.m:	-D__LANGUAGE_OBJECTIVE_C -D_LANGUAGE_OBJECTIVE_C -D__LANGUAGE_C -D_LANGUAGE_C} %{.S:	-D__LANGUAGE_ASSEMBLY -D_LANGUAGE_ASSEMBLY %{!ansi:-DLANGUAGE_ASSEMBLY}} %{.s:	-D__LANGUAGE_ASSEMBLY -D_LANGUAGE_ASSEMBLY %{!ansi:-DLANGUAGE_ASSEMBLY}} %{!.S: %{!.s: %{!.cc: %{!.cxx: %{!.C: %{!.m: -D__LANGUAGE_C -D_LANGUAGE_C %{!ansi:-DLANGUAGE_C}}}}}}} %(subtarget_cpp_size_spec) %{mips3:-U__mips -D__mips=3 -D__mips64} %{mips4:-U__mips -D__mips=4 -D__mips64} %{mgp32:-U__mips64} %{mgp64:-D__mips64} %{msingle-float:%{!msoft-float:-D__mips_single_float}} %{m4650:%{!msoft-float:-D__mips_single_float}} %{msoft-float:-D__mips_soft_float} %{mabi=eabi:-D__mips_eabi} %{mips16:%{!mno-mips16:-D__mips16}} %{EB:-UMIPSEL -U_MIPSEL -U__MIPSEL -U__MIPSEL__ -D_MIPSEB -D__MIPSEB -D__MIPSEB__ %{!ansi:-DMIPSEB}} %{!EB:-UMIPSEB -U_MIPSEB -U__MIPSEB -U__MIPSEB__ -D_MIPSEL -D__MIPSEL -D__MIPSEL__ %{!ansi:-DMIPSEL}} %(long_max_spec) %(subtarget_cpp_spec) 
+  
+  *cpp_options:
+! %{C:%{!E:%eGNU C does not support -C without using -E}} %{std*} %{nostdinc*} %{C} %{v} %{I*} %{P} %{$} %I %{MD:-M -MF %W{!o: %b.d}%W{o*:%.d%*}} %{MMD:-MM -MF %W{!o: %b.d}%W{o*:%.d%*}} %{M} %{MM} %W{MF*} %{MG} %{MP} %{MQ*} %{MT*} %{M|MD|MM|MMD:%{o*:-MQ %*}} %{!no-gcc:-D__GNUC__=%v1 -D__GNUC_MINOR__=%v2 -D__GNUC_PATCHLEVEL__=%v3} %{!undef:%{!ansi:%{!std=*:%p}%{std=gnu*:%p}} %P} %{trigraphs} %c %{Os:-D__OPTIMIZE_SIZE__} %{O*:%{!O0:-D__OPTIMIZE__}} %{fno-inline|O0|!O*:-D__NO_INLINE__} %{ffast-math:-D__FAST_MATH__} %{ffreestanding:-D__STDC_HOSTED__=0} %{fno-hosted:-D__STDC_HOSTED__=0} %{!ffreestanding:%{!fno-hosted:-D__STDC_HOSTED__=1}} %{fshow-column} %{fno-show-column} %{fleading-underscore} %{fno-leading-underscore} %{fno-operator-names} %{ftabstop=*} %{remap} %{g3:-dD} %{W*} %{w} %{pedantic*} %{H} %{d*} %C %{D*&U*&A*} %{i*} %Z %i %{E:%{!M*:%W{o*}}} -fshort-wchar -U__WCHAR_TYPE__ -D__WCHAR_TYPE__=short\ unsigned\ int
+  
+  *trad_capable_cpp:
+  %{traditional|ftraditional|traditional-cpp:trad}cpp0
+  
+  *cc1:
+! %{gline:%{!g:%{!g0:%{!g1:%{!g2: -g1}}}}} %{mips1:-mfp32 -mgp32} %{mips2:-mfp32 -mgp32}%{mips3:%{!msingle-float:%{!m4650:-mfp64}} -mgp64} %{mips4:%{!msingle-float:%{!m4650:-mfp64}} -mgp64} %{mfp64:%{msingle-float:%emay not use both -mfp64 and -msingle-float}} %{mfp64:%{m4650:%emay not use both -mfp64 and -m4650}} %{mint64|mlong64|mlong32:-mexplicit-type-size }%{m4650:-mcpu=r4650} %{m3900:-mips1 -mcpu=r3900 -mfp32 -mgp32} %{G*} %{EB:-meb} %{!EB:-mel} %{EB:%{EL:%emay not use both -EB and -EL}} %{pic-none:   -mno-half-pic} %{pic-lib:    -mhalf-pic} %{pic-extern: -mhalf-pic} %{pic-calls:  -mhalf-pic} %{save-temps: } %(subtarget_cc1_spec) 
+  
+  *cc1_options:
+  %{pg:%{fomit-frame-pointer:%e-pg and -fomit-frame-pointer are incompatible}} %1 %{!Q:-quiet} -dumpbase %B %{d*} %{m*} %{a*} %{g*} %{O*} %{W*} %{w} %{pedantic*} %{std*} %{ansi} %{traditional} %{v:-version} %{pg:-p} %{p} %{f*} %{Qn:-fno-ident} %{--help:--help} %{--target-help:--target-help} %{!fsyntax-only:%{S:%W{o*}%{!o*:-o %b.s}}} %{fsyntax-only:-o %j} %{-param*}
+***************
+*** 34,49 ****
+  
+  
+  *link:
+! %(endian_spec) %{G*} %{mips1} %{mips2} %{mips3} %{mips4} %{bestGnum} %{shared} %{non_shared}
+  
+  *lib:
+! %{pg:-lprof1} %{p:-lprof1} -lc
+  
+  *libgcc:
+  -lgcc
+  
+  *startfile:
+! %{!shared:%{pg:gcrt0%O%s}%{!pg:%{p:mcrt0%O%s}%{!p:crt0%O%s}}}
+  
+  *switches_need_spaces:
+  
+--- 34,49 ----
+  
+  
+  *link:
+! %(endian_spec) %{G*} %{mips1} %{mips2} %{mips3} %{mips4} %{bestGnum} %{shared} %{non_shared} -L/usr/local/wince/lib/hpcpro/mips
+  
+  *lib:
+! %{pg:-lprof1} %{p:-lprof1}
+  
+  *libgcc:
+  -lgcc
+  
+  *startfile:
+! -lcorelibc
+  
+  *switches_need_spaces:
+  
+***************
+*** 52,58 ****
+  %{funsigned-char:-D__CHAR_UNSIGNED__}
+  
+  *predefines:
+! -Dmips -Dunix -Dhost_mips -DMIPSEB -DR3000 -DSYSTYPE_BSD43 -D_mips -D_unix -D_host_mips -D_MIPSEB -D_R3000 -D_SYSTYPE_BSD43 -Asystem=unix -Asystem=bsd -Acpu=mips -Amachine=mips
+  
+  *cross_compile:
+  1
+--- 52,58 ----
+  %{funsigned-char:-D__CHAR_UNSIGNED__}
+  
+  *predefines:
+! -Dmips -Dunix -Dhost_mips -DMIPSEL -DR3000 -DSYSTYPE_BSD43 -D_mips -D_unix -D_host_mips -D_MIPSEL -D_R3000 -D_SYSTYPE_BSD43 -DUNICODE -DUNDER_CE -Asystem=unix -Asystem=bsd -Acpu=mips -Amachine=mips
+  
+  *cross_compile:
+  1
+***************
+*** 64,70 ****
+  . ;
+  
+  *multilib_defaults:
+! EB mips1
+  
+  *multilib_extra:
+  
+--- 64,70 ----
+  . ;
+  
+  *multilib_defaults:
+! EL mips1
+  
+  *multilib_extra:
+  
+***************
+*** 124,130 ****
+  
+  
+  *endian_spec:
+! %{!EL:%{!mel:-EB}} %{EB} %{EL}
+  
+  *link_command:
+  %{!fsyntax-only:%{!c:%{!M:%{!MM:%{!E:%{!S:    %(linker) %l %X %{o*} %{A} %{d} %{e*} %{m} %{N} %{n} %{r} %{s} %{t}    %{u*} %{x} %{z} %{Z} %{!A:%{!nostdlib:%{!nostartfiles:%S}}}    %{static:} %{L*} %(link_libgcc) %o %{!nostdlib:%{!nodefaultlibs:%G %L %G}}    %{!A:%{!nostdlib:%{!nostartfiles:%E}}} %{T*} }}}}}}
+--- 124,130 ----
+  
+  
+  *endian_spec:
+! %{!EB:%{!meb:-EL}} %{EL} %{EB}
+  
+  *link_command:
+  %{!fsyntax-only:%{!c:%{!M:%{!MM:%{!E:%{!S:    %(linker) %l %X %{o*} %{A} %{d} %{e*} %{m} %{N} %{n} %{r} %{s} %{t}    %{u*} %{x} %{z} %{Z} %{!A:%{!nostdlib:%{!nostartfiles:%S}}}    %{static:} %{L*} %(link_libgcc) %o %{!nostdlib:%{!nodefaultlibs:%G %L %G}}    %{!A:%{!nostdlib:%{!nostartfiles:%E}}} %{T*} }}}}}}

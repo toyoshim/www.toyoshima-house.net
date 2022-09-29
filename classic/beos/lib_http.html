@@ -1,0 +1,191 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ShiftJIS">
+		<meta name="Author" content="とよしま">
+		<meta name="KeyWords" content="BeOS">
+		<title>Be a す～ぱ～まん。</title>
+	</head>
+	<body background="./superman.jpg" text="#ccccdd" link="#ff8888">
+
+		<!-- ### 本文 ### -->
+		<blockquote>
+			<table><!-- ### ■HTTPを扱うためのライブラリ ### -->
+				<tr><td><font color="#ffdddd" size="+2">■</font> <font color="#ddddff" size="+2">HTTPを扱うためのライブラリ</font></td></tr>
+				<tr bgcolor="#ccccff"><td height="1"></td></tr>
+			</table>
+			<p>&nbsp;
+			BeOSらしいコードの練習がてら作ってみました。
+			やはりHTTPが手軽に扱えないとなにかと不便ですし。
+			特徴としては、非同期な読み込みをサポートする非同期メソッドと、
+			Translatorなどにそのまま使えるBPositionIOを継承した同期メソッドを持っている点があげられます。
+			<p>&nbsp;
+			非同期メソッドは、WinSockの非同期モードに近い感じで、関数は常にブロックせずに返ります。
+			その後コンストラクタで指定されたBLooperオブジェクトに対し、逐次状況をメッセージとして
+			通達します。読み込み状況を逐次画面に反映させたい場合や、パフォーマンスを細かくコントロール
+			したい場合に有効です。
+			<p>&nbsp;
+			同期メソッドは、通常のファイル読み込みと同様な気軽さで使えるのが特徴です。Seekも使えます。
+			読み込みが完了していないデータを読もうとした場合には、読み込み側のスレッドは、必要な部分の
+			データが届くまで一時的にブロックします。BPositionIOを継承しているので、Translatorに
+			そのまま渡せるので、ウェブ上の画像を直接Translatorで展開するなどといった使い方ができます。
+			<br>&nbsp;<br><font size="+1">◆非同期モードのサンプル</font>
+			<p>&nbsp;
+			細かい処理が多いのと、実行順序が非直線的なのとで、若干複雑に感じるかもしれません。
+			<p>&nbsp;[http_test1.cpp]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">#include &lt;Be.h&gt;
+#include "TxBTcpHttp.h"
+
+// 非同期モデル
+class MyApp: public BApplication{
+private:
+	TxBTcpHttp *http;
+public:
+	MyApp(void):
+		BApplication("application/x-vnd.toyoshima-house.http_test1"),
+		http(NULL) {
+	};
+	~MyApp(void) {
+		if (NULL != http) delete http;
+	}
+	virtual void ReadyToRun(void) {
+		http = new TxBTcpHttp(this);
+		http->SetUserAgent("HTTP Test Client / BeOS");
+		http->SetServer("www.be.com", 80);
+		http->Get("/");
+	};
+	virtual void DispatchMessage(BMessage *msg, BHandler *target) {
+		switch (msg->what) {
+		case TxB_HTTP_NOTIFY:
+			int8 type;
+			if (B_OK != msg->FindInt8(TxB_HTTP_NOTIFY_TYPE, &type)) break;
+			switch (type) {
+			case TxB_HTTP_ERROR:{
+				int32 code;
+				const char *str;
+				msg->FindInt32(TxB_HTTP_NOTIFY_ERRNO, &amp;code);
+				msg->FindString(TxB_HTTP_NOTIFY_MESSAGE, &str);
+				printf("Error %d: %s\n", code, str);
+				Quit();}
+			case TxB_HTTP_HOST_RESOLVED:{
+				int32 addr;
+				int16 port;
+				msg->FindInt32(TxB_HTTP_NOTIFY_ADDRESS, &amp;addr);
+				msg->FindInt16(TxB_HTTP_NOTIFY_PORT, &amp;port);
+				printf("Connecting %d.%d.%d.%d:%d ... ",
+						(addr >> 24) & 0xff, (addr >> 16) & 0xff,
+						(addr >> 8) & 0xff, addr & 0xff, port);
+				fflush(stdout);
+				break;}
+			case TxB_HTTP_CONNECTED:
+				puts("Connected");
+				break;
+			case TxB_HTTP_STATUS:{
+				int16 status;
+				const char *str;
+				msg->FindInt16(TxB_HTTP_NOTIFY_STATUS, &amp;status);
+				msg->FindString(TxB_HTTP_NOTIFY_MESSAGE, &amp;str);
+				printf("Status: %d %s\n", status, str);
+				break;}
+			case TxB_HTTP_HEADER_COMPLETE:
+				puts("Header Complete");
+				break;
+			case TxB_HTTP_CONTENT_LENGTH:{
+				int32 length;
+				msg->FindInt32(TxB_HTTP_NOTIFY_LENGTH, &amp;length);
+				printf("Content-Length: %d\n", length);
+				break;}
+			case TxB_HTTP_COMPLETE:{
+				int32 length;
+				msg->FindInt32(TxB_HTTP_NOTIFY_LENGTH, &amp;length);
+				printf("Complete: %d\n", length);
+				char *buffer = new char[length + 1];
+				size_t slen = length;
+				if (NULL != buffer) {
+					http->AsyncRead(buffer, slen);
+					buffer[length] = 0;
+					puts(buffer);
+				}
+				Quit();}
+			case TxB_HTTP_BUFFER_CHANGED:{
+				int32 newby;
+				int32 current;
+				int32 length = -1;
+				msg->FindInt32(TxB_HTTP_NOTIFY_NEWBY, &amp;newby);
+				msg->FindInt32(TxB_HTTP_NOTIFY_CURRENT, &amp;current);
+				msg->FindInt32(TxB_HTTP_NOTIFY_LENGTH, &amp;length);
+				printf("Read %d bytes: %d/%d\n", newby, current, length);
+				break;}
+			}
+			break;
+		default:
+			BApplication::DispatchMessage(msg, target);
+			break;
+		}
+	};
+};
+
+int
+main(int argc, char **argv)
+{
+	MyApp app;
+	
+	return app.Run();
+}</font></pre></td></tr></table></div>
+			<br>&nbsp;<br><font size="+1">◆同期モードのサンプル</font>
+			<p>&nbsp;
+			こちらは非常に簡単です。たったこれだけのコードでウェブ上の画像ファイルを表示することができます。
+			Javaでもここまで簡単には書けないでしょ（笑）。
+			<p>&nbsp;[http_test2.cpp]
+			<div align="center"><table width="90%"><tr><td bgcolor="#ffffee"><pre><font color="#000000">#include &lt;Be.h&gt;
+#include "TxBTcpHttp.h"
+
+// 同期モデル
+class MyApp2: public BApplication{
+public:
+	MyApp2(void): BApplication("application/x-vnd.toyoshima-house.http_test2") {
+	};
+	virtual void ReadyToRun(void) {
+		// まず読み込みを開始させておくと効率的
+		TxBTcpHttp *http = new TxBTcpHttp();
+		http->SetServer("www.tk.xaxon.ne.jp", 80);
+		http->Get("/~toyoshim/cg/title_mai.jpg");
+
+		// 表示用の窓を準備	
+		BWindow *win = new BWindow(BRect(100, 100, 100 + 320, 100 + 240),
+				"HTTP TEST 2", B_TITLED_WINDOW, B_NOT_RESIZABLE);
+		BView *view = new BView(win->Bounds(), "graphic",
+				B_FOLLOW_ALL_SIDES, B_WILL_DRAW);
+		win->AddChild(view);
+		
+		// BPositionIOとしてTranslatorにぶち込む
+		BBitmap *bmp = BTranslationUtils::GetBitmap(http);
+		delete http;
+		
+		// 窓にペタ！
+		view->SetViewBitmap(bmp);
+		win->Show();
+	};
+};
+
+int
+main(int argc, char **argv)
+{
+	MyApp2 app;
+	
+	return app.Run();
+}</font></pre></td></tr></table></div>
+			<br>&nbsp;<br><font size="+1">◆ダウンロード</font>
+			<p>&nbsp;
+			とりあえず、公開しときます。いきなり修正するかもしれませんが、
+			仕様を変えることはないと思います。自分自身使い回すんで（笑）。
+			ライセンスはArtisticあたりにしておきます。質問・要望は歓迎。
+			改善したコードはもっと歓迎。
+			<div align="center"><a href="./lib/http_20000716.zip">2000/07/16 版</a></div>
+		</blockquote>
+		<div align="center"><a href="./index.html">すげーぜ！</a></div>
+		<hr width="80%">
+		<div align="center"><a href="../main.html"><img src="../banner/psbanner.jpg" width="200" height="40" border="0"></a></div>
+		&nbsp;<br>
+		<div align="right">CVS 最終更新 ---- $Id: lib_http.html,v 1.1 2000/07/16 10:08:31 toyoshim Exp $</div>
+	</body>
+</html>
